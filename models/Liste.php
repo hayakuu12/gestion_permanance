@@ -136,29 +136,23 @@ class Liste
     public function getAllElements()
     {
         $sql = "
+        SELECT
+            e.*,
 
-            SELECT
+            l.type_liste,
+            l.trimestre,
+            l.annee,
+            l.service,
+            l.statut,
+            l.commentaire_validation
 
-                e.*,
+        FROM elements_liste e
 
-                l.type_liste,
+        INNER JOIN listes l
+        ON e.id_liste = l.id_liste
 
-                l.trimestre,
-
-                l.annee,
-
-                l.service,
-
-                l.statut
-
-            FROM elements_liste e
-
-            INNER JOIN listes l
-            ON e.id_liste = l.id_liste
-
-            ORDER BY e.id_element DESC
-
-        ";
+        ORDER BY e.id_element DESC
+    ";
 
         $stmt = $this->conn->prepare($sql);
 
@@ -166,17 +160,15 @@ class Liste
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
     public function getElementsByListe($id_liste)
     {
         $sql = "
-            SELECT *
-            FROM elements_liste
-            WHERE id_liste = ?
-        ";
+        SELECT *
+        FROM elements_liste
+        WHERE id_liste = ?
+    ";
 
         $stmt = $this->conn->prepare($sql);
-
         $stmt->execute([$id_liste]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -340,6 +332,7 @@ class Liste
         return $stmt->fetch()['total'];
     }
 
+
     public function getRecentListes()
     {
         $sql = "
@@ -355,4 +348,158 @@ class Liste
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function changerStatut(
+        $id_liste,
+        $statut,
+        $commentaire = null
+    ) {
+
+        $sql = "
+        UPDATE listes
+
+        SET
+            statut = ?,
+            commentaire_validation = ?
+
+        WHERE id_liste = ?
+    ";
+
+        $stmt =
+            $this->conn->prepare($sql);
+
+        return $stmt->execute([
+
+            $statut,
+            $commentaire,
+            $id_liste
+
+        ]);
+    }
+    public function countPermanences()
+    {
+        $sql = "
+        SELECT COUNT(*) as total
+        FROM listes
+        WHERE type_liste='permanence'
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+
+    public function countHeuresSupp()
+    {
+        $sql = "
+        SELECT COUNT(*) as total
+        FROM listes
+        WHERE type_liste='heures_supp'
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+
+    public function countRefusees()
+    {
+        $sql = "
+        SELECT COUNT(*) as total
+        FROM listes
+        WHERE statut='مرفوضة'
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
+    public function filtrerElements(
+        $annee = null,
+        $trimestre = null,
+        $service = null,
+        $numero_tajir = null
+    ) {
+
+        $sql = "
+
+        SELECT
+            e.*,
+
+            l.type_liste,
+            l.trimestre,
+            l.annee,
+            l.service,
+            l.statut,
+            l.commentaire_validation
+
+        FROM elements_liste e
+
+        INNER JOIN listes l
+        ON e.id_liste = l.id_liste
+
+        WHERE 1=1
+    ";
+
+        $params = [];
+
+        
+
+        if (!empty($annee)) {
+
+            $sql .= "
+            AND l.annee = ?
+        ";
+
+            $params[] = $annee;
+        }
+
+        /* TRIMESTRE */
+
+        if (!empty($trimestre)) {
+
+            $sql .= "
+            AND l.trimestre = ?
+        ";
+
+            $params[] = $trimestre;
+        }
+
+        
+
+        if (!empty($service)) {
+
+            $sql .= "
+            AND l.service = ?
+        ";
+
+            $params[] = $service;
+        }
+
+        
+
+        if (!empty($numero_tajir)) {
+
+            $sql .= "
+            AND e.numero_tajir LIKE ?
+        ";
+
+            $params[] =
+                "%" . $numero_tajir . "%";
+        }
+
+        $sql .= "
+        ORDER BY e.id_element DESC
+    ";
+
+        $stmt =
+            $this->conn->prepare($sql);
+
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
 }

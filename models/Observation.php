@@ -68,4 +68,16 @@ class Observation
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function countObservations()
+    {
+        $sql = "
+        SELECT COUNT(*) as total
+        FROM observations
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
+    }
 }

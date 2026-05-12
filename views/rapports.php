@@ -10,11 +10,62 @@ $listeModel = new Liste();
 $controleModel = new Controle();
 $observationModel = new Observation();
 
+/* VALIDATION */
+
+if(isset($_POST['valider'])){
+
+    $listeModel->changerStatut(
+
+        $_POST['id_liste'],
+
+        'تمت المصادقة',
+
+        null
+
+    );
+}
+
+if(isset($_POST['refuser'])){
+
+    $listeModel->changerStatut(
+
+        $_POST['id_liste'],
+
+        'مرفوضة',
+
+        $_POST['commentaire']
+
+    );
+}
+
+/* FILTERS */
+
+$annee =
+$_GET['annee'] ?? '';
+
+$trimestre =
+$_GET['trimestre'] ?? '';
+
+$service =
+$_GET['service'] ?? '';
+
+$numero_tajir =
+$_GET['numero_tajir'] ?? '';
+
+/* DATA */
+
 $elements =
-    $listeModel->getAllElements();
+$listeModel->filtrerElements(
+
+    $annee,
+    $trimestre,
+    $service,
+    $numero_tajir
+
+);
 
 $observations =
-    $observationModel->getObservations();
+$observationModel->getObservations();
 
 ?>
 
@@ -22,6 +73,8 @@ $observations =
 <?php require 'views/layouts/sidebar.php'; ?>
 
 <div class="main">
+
+    <!-- TOPBAR -->
 
     <div class="topbar">
 
@@ -42,13 +95,17 @@ $observations =
             </h3>
 
             <p>
-                XLSX
+                XLS
             </p>
 
             <br>
-            
-            <a href="exports/export_excel.php" class="btn-valid">تحميل Excel</a>
 
+            <a
+                href="exports/export_excel.php"
+                class="btn-valid"
+            >
+                تحميل Excel
+            </a>
 
         </div>
 
@@ -64,10 +121,139 @@ $observations =
 
             <br>
 
-
-            <a href="exports/export_pdf.php" class="btn-edit">تحميل PDF</a>
+            <a
+                href="exports/export_pdf.php"
+                class="btn-edit"
+            >
+                تحميل PDF
+            </a>
 
         </div>
+
+    </div>
+
+    <!-- FILTERS -->
+
+    <div class="box">
+
+        <h2>
+            البحث والتصفية
+        </h2>
+
+        <form method="GET">
+
+            <input
+                type="hidden"
+                name="page"
+                value="rapports"
+            >
+
+            <div class="row">
+
+                <!-- YEAR -->
+
+                <div class="input-group">
+
+                    <label>
+                        السنة
+                    </label>
+
+                    <input
+                        type="number"
+                        name="annee"
+                        value="<?= $annee ?>"
+                    >
+
+                </div>
+
+                <!-- TRIMESTRE -->
+
+                <div class="input-group">
+
+                    <label>
+                        الشطر
+                    </label>
+
+                    <select name="trimestre">
+
+                        <option value="">
+                            الكل
+                        </option>
+
+                        <option
+                            value="1"
+                            <?= $trimestre=="1" ? "selected" : "" ?>
+                        >
+                            الأول
+                        </option>
+
+                        <option
+                            value="2"
+                            <?= $trimestre=="2" ? "selected" : "" ?>
+                        >
+                            الثاني
+                        </option>
+
+                        <option
+                            value="3"
+                            <?= $trimestre=="3" ? "selected" : "" ?>
+                        >
+                            الثالث
+                        </option>
+
+                        <option
+                            value="4"
+                            <?= $trimestre=="4" ? "selected" : "" ?>
+                        >
+                            الرابع
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- SERVICE -->
+
+                <div class="input-group">
+
+                    <label>
+                        المصلحة
+                    </label>
+
+                    <input
+                        type="text"
+                        name="service"
+                        value="<?= $service ?>"
+                    >
+
+                </div>
+
+                <!-- TAJIR -->
+
+                <div class="input-group">
+
+                    <label>
+                        رقم التأجير
+                    </label>
+
+                    <input
+                        type="text"
+                        name="numero_tajir"
+                        value="<?= $numero_tajir ?>"
+                    >
+
+                </div>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn-edit"
+            >
+                بحث
+            </button>
+
+        </form>
 
     </div>
 
@@ -116,11 +302,11 @@ $observations =
                         </th>
 
                         <th>
-                            الأيام
+                            عدد الأيام
                         </th>
 
                         <th>
-                            الساعات
+                            عدد الساعات
                         </th>
 
                         <th>
@@ -143,86 +329,218 @@ $observations =
                             السنة
                         </th>
 
+                        <th>
+                            الحالة
+                        </th>
+
+                        <th>
+                            تعليق
+                        </th>
+
+                        <th>
+                            الإجراء
+                        </th>
+
                     </tr>
 
                 </thead>
 
                 <tbody>
 
-                    <?php if (!empty($elements)): ?>
+                    <?php if(!empty($elements)): ?>
 
-                        <?php foreach ($elements as $e): ?>
+                        <?php foreach($elements as $e): ?>
 
                             <tr>
+
+                                <!-- TYPE -->
 
                                 <td>
 
                                     <?=
-                                        $e['type_liste']
-                                        ==
-                                        'permanence'
+                                    $e['type_liste']
+                                    ==
+                                    'permanence'
 
-                                        ?
+                                    ?
 
-                                        'ديمومة'
+                                    'ديمومة'
 
-                                        :
+                                    :
 
-                                        'ساعات إضافية'
-                                        ?>
+                                    'ساعات إضافية'
+                                    ?>
 
                                 </td>
+
+                                <!-- NOM -->
 
                                 <td>
                                     <?= $e['nom_complet'] ?>
                                 </td>
 
+                                <!-- TAJIR -->
+
                                 <td>
                                     <?= $e['numero_tajir'] ?>
                                 </td>
+
+                                <!-- CIN -->
 
                                 <td>
                                     <?= $e['cin'] ?>
                                 </td>
 
+                                <!-- CADRE -->
+
                                 <td>
                                     <?= $e['cadre'] ?>
                                 </td>
+
+                                <!-- SERVICE -->
 
                                 <td>
                                     <?= $e['service'] ?>
                                 </td>
 
+                                <!-- MOIS -->
+
                                 <td>
                                     <?= $e['mois'] ?>
                                 </td>
+
+                                <!-- DAYS -->
 
                                 <td>
                                     <?= $e['nombre_jours'] ?>
                                 </td>
 
+                                <!-- HOURS -->
+
                                 <td>
                                     <?= $e['nombre_heures'] ?>
                                 </td>
+
+                                <!-- TRAVAUX -->
 
                                 <td>
                                     <?= $e['travaux'] ?>
                                 </td>
 
+                                <!-- DATE D -->
+
                                 <td>
                                     <?= $e['date_debut'] ?>
                                 </td>
+
+                                <!-- DATE F -->
 
                                 <td>
                                     <?= $e['date_fin'] ?>
                                 </td>
 
+                                <!-- TRIM -->
+
                                 <td>
                                     <?= $e['trimestre'] ?>
                                 </td>
 
+                                <!-- YEAR -->
+
                                 <td>
                                     <?= $e['annee'] ?>
+                                </td>
+
+                                <!-- STATUS -->
+
+                                <td>
+
+                                    <?php if($e['statut'] == 'تمت المصادقة'): ?>
+
+                                        <span class="badge info">
+                                            تمت المصادقة
+                                        </span>
+
+                                    <?php elseif($e['statut'] == 'مرفوضة'): ?>
+
+                                        <span class="badge danger">
+                                            مرفوضة
+                                        </span>
+
+                                    <?php else: ?>
+
+                                        <span class="badge warning">
+                                            في الانتظار
+                                        </span>
+
+                                    <?php endif; ?>
+
+                                </td>
+
+                                <!-- COMMENT -->
+
+                                <td>
+
+                                    <?= $e['commentaire_validation'] ?>
+
+                                </td>
+
+                                <!-- ACTIONS -->
+
+                                <td>
+
+                                    <div class="actions-box">
+
+                                        <!-- ACCEPT -->
+
+                                        <form method="POST">
+
+                                            <input
+                                                type="hidden"
+                                                name="id_liste"
+                                                value="<?= $e['id_liste'] ?>"
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                name="valider"
+                                                class="btn-valid"
+                                            >
+                                                قبول
+                                            </button>
+
+                                        </form>
+
+                                        <!-- REFUSE -->
+
+                                        <form method="POST">
+
+                                            <input
+                                                type="hidden"
+                                                name="id_liste"
+                                                value="<?= $e['id_liste'] ?>"
+                                            >
+
+                                            <input
+                                                type="text"
+                                                name="commentaire"
+                                                class="comment-input"
+                                                placeholder="سبب الرفض"
+                                                required
+                                            >
+
+                                            <button
+                                                type="submit"
+                                                name="refuser"
+                                                class="btn-delete"
+                                            >
+                                                رفض
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
                                 </td>
 
                             </tr>
@@ -233,7 +551,7 @@ $observations =
 
                         <tr>
 
-                            <td colspan="14">
+                            <td colspan="17">
 
                                 لا توجد بيانات حاليا
 
@@ -301,9 +619,9 @@ $observations =
 
                 <tbody>
 
-                    <?php if (!empty($observations)): ?>
+                    <?php if(!empty($observations)): ?>
 
-                        <?php foreach ($observations as $o): ?>
+                        <?php foreach($observations as $o): ?>
 
                             <tr>
 
@@ -314,18 +632,18 @@ $observations =
                                 <td>
 
                                     <?=
-                                        $o['type_liste']
-                                        ==
-                                        'permanence'
+                                    $o['type_liste']
+                                    ==
+                                    'permanence'
 
-                                        ?
+                                    ?
 
-                                        'ديمومة'
+                                    'ديمومة'
 
-                                        :
+                                    :
 
-                                        'ساعات إضافية'
-                                        ?>
+                                    'ساعات إضافية'
+                                    ?>
 
                                 </td>
 
@@ -343,13 +661,13 @@ $observations =
 
                                 <td>
 
-                                    <?php if ($o['niveau'] == "grave"): ?>
+                                    <?php if($o['niveau']=="grave"): ?>
 
                                         <span class="badge danger">
                                             خطير
                                         </span>
 
-                                    <?php elseif ($o['niveau'] == "attention"): ?>
+                                    <?php elseif($o['niveau']=="attention"): ?>
 
                                         <span class="badge warning">
                                             تنبيه

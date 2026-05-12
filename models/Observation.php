@@ -80,4 +80,17 @@ class Observation
 
         return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
+    public function countByNiveau()
+    {
+        $sql = "
+        SELECT niveau, COUNT(*) as total
+        FROM observations
+        GROUP BY niveau
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

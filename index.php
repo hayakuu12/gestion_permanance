@@ -22,7 +22,9 @@ switch ($page) {
     case 'observations':
         require 'views/observations.php';
         break;
-
+    case 'statistiques':
+        require 'views/statistiques.php';
+        break;
     default:
         require 'views/dashboard.php';
         break;

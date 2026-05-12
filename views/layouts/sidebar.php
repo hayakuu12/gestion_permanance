@@ -7,4 +7,5 @@
     <a href="index.php?page=controles">المراقبة والملاحظات</a>
     <a href="index.php?page=rapports">التقارير</a>
     <a href="index.php?page=observations">الملاحظات الإدارية</a>
+    <a href="index.php?page=statistiques">الإحصائيات</a>
 </div>

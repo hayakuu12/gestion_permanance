@@ -445,7 +445,7 @@ class Liste
 
         $params = [];
 
-        
+
 
         if (!empty($annee)) {
 
@@ -467,7 +467,7 @@ class Liste
             $params[] = $trimestre;
         }
 
-        
+
 
         if (!empty($service)) {
 
@@ -478,7 +478,7 @@ class Liste
             $params[] = $service;
         }
 
-        
+
 
         if (!empty($numero_tajir)) {
 
@@ -501,5 +501,33 @@ class Liste
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function countByStatut()
+    {
+        $sql = "
+        SELECT statut, COUNT(*) as total
+        FROM listes
+        GROUP BY statut
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countByService()
+    {
+        $sql = "
+        SELECT service, COUNT(*) as total
+        FROM listes
+        GROUP BY service
+    ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
+
 }

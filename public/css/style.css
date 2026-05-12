@@ -1,0 +1,421 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Tahoma","Arial",sans-serif;
+}
+
+body{
+    background:#eef2f7;
+    direction:rtl;
+    display:flex;
+    color:#0f172a;
+}
+
+/* Sidebar */
+.sidebar{
+    width:260px;
+    min-height:100vh;
+    background:linear-gradient(180deg,#0f172a,#1e293b);
+    padding:25px 18px;
+    position:fixed;
+    right:0;
+    top:0;
+}
+
+.sidebar h2{
+    color:white;
+    text-align:center;
+    margin-bottom:30px;
+    font-size:23px;
+}
+
+.sidebar a{
+    display:block;
+    color:#e2e8f0;
+    text-decoration:none;
+    padding:14px 16px;
+    margin-bottom:10px;
+    border-radius:10px;
+    transition:.3s;
+    font-weight:bold;
+}
+
+.sidebar a:hover{
+    background:#2563eb;
+    transform:translateX(-5px);
+}
+
+/* Main */
+.main{
+    margin-right:260px;
+    width:calc(100% - 260px);
+    padding:25px;
+}
+
+.topbar{
+    background:white;
+    padding:22px;
+    border-radius:16px;
+    margin-bottom:20px;
+    box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.topbar h1{
+    font-size:30px;
+}
+
+/* Box */
+.box{
+    background:white;
+    padding:25px;
+    border-radius:18px;
+    margin-bottom:22px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+}
+
+.box h2{
+    margin-bottom:22px;
+    font-size:25px;
+}
+
+/* Layout */
+.row{
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+.input-group{
+    flex:1;
+    min-width:210px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:bold;
+    color:#1e293b;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #cbd5e1;
+    border-radius:10px;
+    background:white;
+    outline:none;
+    transition:.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:#2563eb;
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+
+textarea{
+    min-height:90px;
+    resize:vertical;
+}
+
+/* Buttons */
+button,
+.btn-valid,
+.btn-edit,
+.btn-delete{
+    border:none;
+    padding:12px 20px;
+    border-radius:10px;
+    color:white;
+    cursor:pointer;
+    text-decoration:none;
+    font-weight:bold;
+    display:inline-block;
+    transition:.25s;
+}
+
+button{
+    background:#2563eb;
+}
+
+button:hover,
+.btn-valid:hover,
+.btn-edit:hover,
+.btn-delete:hover{
+    opacity:.92;
+    transform:scale(1.03);
+}
+
+.btn-valid{
+    background:#16a34a;
+}
+
+.btn-edit{
+    background:#0ea5e9;
+}
+
+.btn-delete{
+    background:#dc2626;
+}
+
+/* Upload Design */
+.upload-wrapper{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    align-items:stretch;
+}
+
+.upload-infos{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:18px;
+    margin-bottom:12px;
+}
+
+.upload-card{
+    width:100%;
+    min-height:230px;
+    border:3px dashed #2563eb;
+    border-radius:24px;
+    background:linear-gradient(135deg,#eff6ff,#dbeafe);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    cursor:pointer;
+    transition:.3s;
+    overflow:hidden;
+    position:relative;
+}
+
+.upload-card:hover{
+    border-color:#1d4ed8;
+    background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+    transform:translateY(-5px);
+}
+
+.upload-card input{
+    display:none;
+}
+
+.upload-content{
+    z-index:2;
+}
+
+.upload-icon{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:white;
+    margin:auto;
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:42px;
+    color:#2563eb;
+    box-shadow:0 8px 25px rgba(37,99,235,.25);
+}
+
+.upload-title{
+    font-size:25px;
+    font-weight:bold;
+    color:#0f172a;
+    margin-bottom:10px;
+}
+
+.upload-desc{
+    color:#475569;
+    font-size:15px;
+    font-weight:bold;
+}
+
+.upload-btn{
+    margin-top:15px;
+}
+
+/* Cards */
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.card{
+    background:white;
+    padding:22px;
+    border-radius:18px;
+    border-right:6px solid #2563eb;
+    box-shadow:0 4px 14px rgba(0,0,0,.07);
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+}
+
+.card h3{
+    color:#334155;
+    margin-bottom:12px;
+}
+
+.card p{
+    font-size:30px;
+    font-weight:bold;
+    color:#2563eb;
+}
+
+/* Tables */
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+    border-radius:14px;
+    overflow:hidden;
+}
+
+th{
+    background:#e2e8f0;
+    color:#0f172a;
+    padding:14px;
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #e5e7eb;
+    text-align:center;
+    vertical-align:middle;
+}
+
+tr:hover{
+    background:#f8fafc;
+}
+
+table input,
+table select{
+    width:115px;
+    padding:8px;
+    font-size:14px;
+}
+
+table textarea{
+    width:180px;
+    min-height:55px;
+    padding:8px;
+    font-size:13px;
+}
+
+table td:first-child input{
+    width:175px;
+}
+
+/* Badges */
+.badge{
+    padding:6px 12px;
+    border-radius:20px;
+    color:white;
+    font-size:13px;
+    font-weight:bold;
+}
+
+.danger{
+    background:#dc2626;
+}
+
+.warning{
+    background:#f59e0b;
+}
+
+.info{
+    background:#2563eb;
+}
+
+/* Messages */
+.success{
+    background:#16a34a;
+    color:white;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:18px;
+    box-shadow:0 4px 12px rgba(22,163,74,.25);
+}
+
+.note{
+    background:#fff7ed;
+    color:#9a3412;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:15px;
+    font-weight:bold;
+}
+
+small{
+    display:block;
+    margin-top:6px;
+}
+/* Fix big tables inside boxes */
+.box{
+    overflow:hidden;
+}
+
+.table-scroll{
+    width:100%;
+    overflow-x:auto;
+    padding-bottom:8px;
+}
+
+.table-scroll table{
+    min-width:1200px;
+}
+
+/* Smaller table inputs */
+table input{
+    width:95px;
+    padding:7px;
+}
+
+table td:first-child input{
+    width:140px;
+}
+
+table textarea{
+    width:150px;
+}
+
+/* Responsive */
+@media(max-width:900px){
+    body{
+        display:block;
+    }
+
+    .sidebar{
+        position:relative;
+        width:100%;
+        min-height:auto;
+    }
+
+    .main{
+        margin-right:0;
+        width:100%;
+    }
+
+    .row{
+        flex-direction:column;
+    }
+
+    table{
+        font-size:13px;
+        display:block;
+        overflow-x:auto;
+        white-space:nowrap;
+    }
+}

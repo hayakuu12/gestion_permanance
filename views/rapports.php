@@ -220,11 +220,18 @@ $observationModel->getObservations();
                         المصلحة
                     </label>
 
-                    <input
-                        type="text"
-                        name="service"
-                        value="<?= $service ?>"
-                    >
+                    <select name="service">
+                        <option value="">الكل</option>
+                        <option value="المديرية الإقليمية للعدل بمكناس" <?= $service=="المديرية الإقليمية للعدل بمكناس" ? "selected" : "" ?>>المديرية الإقليمية للعدل بمكناس</option>
+                        <option value="كتابة الضبط بالمحكمة الابتدائية بأزرو" <?= $service=="كتابة الضبط بالمحكمة الابتدائية بأزرو" ? "selected" : "" ?>>كتابة الضبط بالمحكمة الابتدائية بأزرو</option>
+                        <option value="كتابة الضبط بالمحكمة الابتدائية بالحاجب" <?= $service=="كتابة الضبط بالمحكمة الابتدائية بالحاجب" ? "selected" : "" ?>>كتابة الضبط بالمحكمة الابتدائية بالحاجب</option>
+                        <option value="كتابة الضبط بالمحكمة الابتدائية بمكناس" <?= $service=="كتابة الضبط بالمحكمة الابتدائية بمكناس" ? "selected" : "" ?>>كتابة الضبط بالمحكمة الابتدائية بمكناس</option>
+                        <option value="كتابة الضبط بمحكمة الاستئناف بمكناس" <?= $service=="كتابة الضبط بمحكمة الاستئناف بمكناس" ? "selected" : "" ?>>كتابة الضبط بمحكمة الاستئناف بمكناس</option>
+                        <option value="كتابة النيابة العامة بالمحكمة الابتدائية بأزرو" <?= $service=="كتابة النيابة العامة بالمحكمة الابتدائية بأزرو" ? "selected" : "" ?>>كتابة النيابة العامة بالمحكمة الابتدائية بأزرو</option>
+                        <option value="كتابة النيابة العامة بالمحكمة الابتدائية بالحاجب" <?= $service=="كتابة النيابة العامة بالمحكمة الابتدائية بالحاجب" ? "selected" : "" ?>>كتابة النيابة العامة بالمحكمة الابتدائية بالحاجب</option>
+                        <option value="كتابة النيابة العامة بالمحكمة الابتدائية بمكناس" <?= $service=="كتابة النيابة العامة بالمحكمة الابتدائية بمكناس" ? "selected" : "" ?>>كتابة النيابة العامة بالمحكمة الابتدائية بمكناس</option>
+                        <option value="كتابة النيابة العامة بمحكمة الاستئناف بمكناس" <?= $service=="كتابة النيابة العامة بمحكمة الاستئناف بمكناس" ? "selected" : "" ?>>كتابة النيابة العامة بمحكمة الاستئناف بمكناس</option>
+                    </select>
 
                 </div>
 
@@ -353,103 +360,20 @@ $observationModel->getObservations();
 
                             <tr>
 
-                                <!-- TYPE -->
-
-                                <td>
-
-                                    <?=
-                                    $e['type_liste']
-                                    ==
-                                    'permanence'
-
-                                    ?
-
-                                    'ديمومة'
-
-                                    :
-
-                                    'ساعات إضافية'
-                                    ?>
-
-                                </td>
-
-                                <!-- NOM -->
-
-                                <td>
-                                    <?= $e['nom_complet'] ?>
-                                </td>
-
-                                <!-- TAJIR -->
-
-                                <td>
-                                    <?= $e['numero_tajir'] ?>
-                                </td>
-
-                                <!-- CIN -->
-
-                                <td>
-                                    <?= $e['cin'] ?>
-                                </td>
-
-                                <!-- CADRE -->
-
-                                <td>
-                                    <?= $e['cadre'] ?>
-                                </td>
-
-                                <!-- SERVICE -->
-
-                                <td>
-                                    <?= $e['service'] ?>
-                                </td>
-
-                                <!-- MOIS -->
-
-                                <td>
-                                    <?= $e['mois'] ?>
-                                </td>
-
-                                <!-- DAYS -->
-
-                                <td>
-                                    <?= $e['nombre_jours'] ?>
-                                </td>
-
-                                <!-- HOURS -->
-
-                                <td>
-                                    <?= $e['nombre_heures'] ?>
-                                </td>
-
-                                <!-- TRAVAUX -->
-
-                                <td>
-                                    <?= $e['travaux'] ?>
-                                </td>
-
-                                <!-- DATE D -->
-
-                                <td>
-                                    <?= $e['date_debut'] ?>
-                                </td>
-
-                                <!-- DATE F -->
-
-                                <td>
-                                    <?= $e['date_fin'] ?>
-                                </td>
-
-                                <!-- TRIM -->
-
-                                <td>
-                                    <?= $e['trimestre'] ?>
-                                </td>
-
-                                <!-- YEAR -->
-
-                                <td>
-                                    <?= $e['annee'] ?>
-                                </td>
+                                <td><?= $e['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?></td>
+                                <td><?= htmlspecialchars($e['nom_complet'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['numero_tajir'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['cin'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['cadre'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['service'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['mois'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['nombre_jours'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['nombre_heures'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['travaux'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['date_debut'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['date_fin'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['trimestre'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($e['annee'] ?? '') ?></td>
 
                                 <!-- STATUS -->
 
@@ -479,11 +403,7 @@ $observationModel->getObservations();
 
                                 <!-- COMMENT -->
 
-                                <td>
-
-                                    <?= $e['commentaire_validation'] ?>
-
-                                </td>
+                                <td><?= htmlspecialchars($e['commentaire_validation'] ?? '') ?></td>
 
                                 <!-- ACTIONS -->
 
@@ -498,7 +418,7 @@ $observationModel->getObservations();
                                             <input
                                                 type="hidden"
                                                 name="id_liste"
-                                                value="<?= $e['id_liste'] ?>"
+                                                value="<?= htmlspecialchars($e['id_liste']) ?>"
                                             >
 
                                             <button
@@ -518,7 +438,7 @@ $observationModel->getObservations();
                                             <input
                                                 type="hidden"
                                                 name="id_liste"
-                                                value="<?= $e['id_liste'] ?>"
+                                                value="<?= htmlspecialchars($e['id_liste']) ?>"
                                             >
 
                                             <input
@@ -625,39 +545,11 @@ $observationModel->getObservations();
 
                             <tr>
 
-                                <td>
-                                    <?= $o['id_liste'] ?>
-                                </td>
-
-                                <td>
-
-                                    <?=
-                                    $o['type_liste']
-                                    ==
-                                    'permanence'
-
-                                    ?
-
-                                    'ديمومة'
-
-                                    :
-
-                                    'ساعات إضافية'
-                                    ?>
-
-                                </td>
-
-                                <td>
-                                    <?= $o['service'] ?>
-                                </td>
-
-                                <td>
-                                    <?= $o['type_observation'] ?>
-                                </td>
-
-                                <td>
-                                    <?= $o['message'] ?>
-                                </td>
+                                <td><?= htmlspecialchars($o['id_liste'] ?? '') ?></td>
+                                <td><?= $o['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?></td>
+                                <td><?= htmlspecialchars($o['service'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($o['type_observation'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($o['message'] ?? '') ?></td>
 
                                 <td>
 
@@ -683,9 +575,7 @@ $observationModel->getObservations();
 
                                 </td>
 
-                                <td>
-                                    <?= $o['date_observation'] ?>
-                                </td>
+                                <td><?= htmlspecialchars($o['date_observation'] ?? '') ?></td>
 
                             </tr>
 

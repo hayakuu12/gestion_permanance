@@ -23,13 +23,16 @@ if (isset($_POST['importer'])) {
     $trimestre = $_POST['trimestre'];
     $annee = $_POST['annee'];
 
+    $service = $_POST['service'] ?? '';
+
     if (isset($_FILES['permanence']) && $_FILES['permanence']['error'] == 0) {
 
         $result = $importController->importerPDF(
             $_FILES['permanence'],
             "permanence",
             $trimestre,
-            $annee
+            $annee,
+            $service
         );
 
         $success = $result['message'];
@@ -47,7 +50,8 @@ if (isset($_POST['importer'])) {
             $_FILES['heures_supp'],
             "heures_supp",
             $trimestre,
-            $annee
+            $annee,
+            $service
         );
 
         $success = $result['message'];
@@ -69,11 +73,16 @@ if (isset($_POST['ajouter_manuel'])) {
         $_POST['type_liste'],
         $_POST['nom_complet'],
         $_POST['numero_tajir'],
-        $_POST['service'],
+        "",
+        "",
         $_POST['mois'],
+        "",
+        "",
         $_POST['valeur'],
-        $_POST['date_debut'],
-        $_POST['date_fin']
+        0,
+        "",
+        $_POST['date_debut'] ?: null,
+        $_POST['date_fin'] ?: null
     );
 
     $success = "تمت إضافة المعطيات يدوياً بنجاح";
@@ -125,7 +134,7 @@ $elements = $listeModel->getAllElements();
 
     <?php if ($success != ""): ?>
         <div class="success">
-            <?= $success ?>
+            <?= htmlspecialchars($success) ?>
         </div>
     <?php endif; ?>
 
@@ -150,6 +159,22 @@ $elements = $listeModel->getAllElements();
             </div>
 
             <div class="row">
+
+                <div class="input-group">
+                    <label>المصلحة</label>
+                    <select name="service" required>
+                        <option value="">اختيار المصلحة</option>
+                        <option value="المديرية الإقليمية للعدل بمكناس">المديرية الإقليمية للعدل بمكناس</option>
+                        <option value="كتابة الضبط بالمحكمة الابتدائية بأزرو">كتابة الضبط بالمحكمة الابتدائية بأزرو</option>
+                        <option value="كتابة الضبط بالمحكمة الابتدائية بالحاجب">كتابة الضبط بالمحكمة الابتدائية بالحاجب</option>
+                        <option value="كتابة الضبط بالمحكمة الابتدائية بمكناس">كتابة الضبط بالمحكمة الابتدائية بمكناس</option>
+                        <option value="كتابة الضبط بمحكمة الاستئناف بمكناس">كتابة الضبط بمحكمة الاستئناف بمكناس</option>
+                        <option value="كتابة النيابة العامة بالمحكمة الابتدائية بأزرو">كتابة النيابة العامة بالمحكمة الابتدائية بأزرو</option>
+                        <option value="كتابة النيابة العامة بالمحكمة الابتدائية بالحاجب">كتابة النيابة العامة بالمحكمة الابتدائية بالحاجب</option>
+                        <option value="كتابة النيابة العامة بالمحكمة الابتدائية بمكناس">كتابة النيابة العامة بالمحكمة الابتدائية بمكناس</option>
+                        <option value="كتابة النيابة العامة بمحكمة الاستئناف بمكناس">كتابة النيابة العامة بمحكمة الاستئناف بمكناس</option>
+                    </select>
+                </div>
 
                 <div class="input-group">
                     <label>الشطر</label>
@@ -188,8 +213,8 @@ $elements = $listeModel->getAllElements();
 
             <form method="POST">
 
-                <input type="hidden" name="id_liste" value="<?= $manualListeId ?>">
-                <input type="hidden" name="type_liste" value="<?= $manualType ?>">
+                <input type="hidden" name="id_liste" value="<?= htmlspecialchars($manualListeId) ?>">
+                <input type="hidden" name="type_liste" value="<?= htmlspecialchars($manualType) ?>">
 
                 <div class="row">
 
@@ -298,21 +323,19 @@ $elements = $listeModel->getAllElements();
                     <?php foreach ($elements as $el): ?>
 
                         <tr>
-                            <td><?= $el['id_liste'] ?></td>
-                            <td><?= $el['nom_complet'] ?></td>
-                            <td><?= $el['numero_tajir'] ?></td>
-                            <td><?= $el['service'] ?? '' ?></td>
-                            <td>
-                                <?= $el['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?>
-                            </td>
-                            <td><?= $el['mois'] ?></td>
-                            <td><?= $el['date_debut'] ?? '' ?></td>
-                            <td><?= $el['date_fin'] ?? '' ?></td>
-                            <td><?= $el['nombre_jours'] ?></td>
-                            <td><?= $el['nombre_heures'] ?></td>
-                            <td><?= $el['trimestre'] ?></td>
-                            <td><?= $el['annee'] ?></td>
-                            <td><?= $el['statut'] ?></td>
+                            <td><?= htmlspecialchars($el['id_liste'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['nom_complet'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['numero_tajir'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['service'] ?? '') ?></td>
+                            <td><?= $el['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?></td>
+                            <td><?= htmlspecialchars($el['mois'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['date_debut'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['date_fin'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['nombre_jours'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['nombre_heures'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['trimestre'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['annee'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($el['statut'] ?? '') ?></td>
                         </tr>
 
                     <?php endforeach; ?>
@@ -354,10 +377,10 @@ $elements = $listeModel->getAllElements();
                     <?php foreach ($controles as $controle): ?>
 
                         <tr>
-                            <td><?= $controle['nom_complet'] ?></td>
-                            <td><?= $controle['numero_tajir'] ?></td>
-                            <td><?= $controle['type_controle'] ?></td>
-                            <td><?= $controle['message'] ?></td>
+                            <td><?= htmlspecialchars($controle['nom_complet'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($controle['numero_tajir'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($controle['type_controle'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($controle['message'] ?? '') ?></td>
                             <td>
                                 <?php if ($controle['niveau'] == 'grave'): ?>
                                     <span class="badge danger">خطير</span>

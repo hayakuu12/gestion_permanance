@@ -8,4 +8,5 @@
     <a href="index.php?page=rapports">التقارير</a>
     <a href="index.php?page=observations">الملاحظات الإدارية</a>
     <a href="index.php?page=statistiques">الإحصائيات</a>
+    <a href="index.php?page=services">إحصائيات المصالح</a>
 </div>

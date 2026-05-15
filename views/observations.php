@@ -1,4 +1,4 @@
-    <?php
+<?php
 
 require_once 'autoload.php';
 
@@ -39,7 +39,7 @@ $observations = $observationModel->getObservations();
 
     <?php if ($success != ""): ?>
         <div class="success">
-            <?= $success ?>
+            <?= htmlspecialchars($success) ?>
         </div>
     <?php endif; ?>
 
@@ -60,27 +60,12 @@ $observations = $observationModel->getObservations();
                         <option value="">اختيار اللائحة</option>
 
                         <?php foreach ($listes as $liste): ?>
-
-                            <option value="<?= $liste['id_liste'] ?>">
-
-                                <?= $liste['id_liste'] ?> -
-
-                                <?=
-                                $liste['type_liste'] == 'permanence'
-                                ? 'ديمومة'
-                                : 'ساعات إضافية'
-                                ?>
-
-                                -
-
-                                <?= $liste['service'] ?? '' ?>
-
-                                -
-
-                                <?= $liste['annee'] ?>
-
+                            <option value="<?= htmlspecialchars($liste['id_liste']) ?>">
+                                <?= htmlspecialchars($liste['id_liste']) ?> -
+                                <?= $liste['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?> -
+                                <?= htmlspecialchars($liste['service'] ?? '') ?> -
+                                <?= htmlspecialchars($liste['annee'] ?? '') ?>
                             </option>
-
                         <?php endforeach; ?>
 
                     </select>
@@ -92,41 +77,15 @@ $observations = $observationModel->getObservations();
                     <label>نوع الملاحظة</label>
 
                     <select name="type_observation" required>
-
                         <option value="">اختيار نوع الملاحظة</option>
-
-                        <option value="خطأ في الرقم المالي">
-                            خطأ في الرقم المالي
-                        </option>
-
-                        <option value="خطأ في رقم البطاقة الوطنية">
-                            خطأ في رقم البطاقة الوطنية
-                        </option>
-
-                        <option value="تجاوز عدد الأيام المسموح">
-                            تجاوز عدد الأيام المسموح
-                        </option>
-
-                        <option value="عدم التوقيع أو التأشير">
-                            عدم التوقيع أو التأشير
-                        </option>
-
-                        <option value="القوائم غير مطبوعة">
-                            القوائم غير مطبوعة
-                        </option>
-
-                        <option value="عدم احترام الآجال">
-                            عدم احترام الآجال
-                        </option>
-
-                        <option value="الجمع بين تعويضين">
-                            الجمع بين تعويضين
-                        </option>
-
-                        <option value="ملاحظة أخرى">
-                            ملاحظة أخرى
-                        </option>
-
+                        <option value="خطأ في الرقم المالي">خطأ في الرقم المالي</option>
+                        <option value="خطأ في رقم البطاقة الوطنية">خطأ في رقم البطاقة الوطنية</option>
+                        <option value="تجاوز عدد الأيام المسموح">تجاوز عدد الأيام المسموح</option>
+                        <option value="عدم التوقيع أو التأشير">عدم التوقيع أو التأشير</option>
+                        <option value="القوائم غير مطبوعة">القوائم غير مطبوعة</option>
+                        <option value="عدم احترام الآجال">عدم احترام الآجال</option>
+                        <option value="الجمع بين تعويضين">الجمع بين تعويضين</option>
+                        <option value="ملاحظة أخرى">ملاحظة أخرى</option>
                     </select>
 
                 </div>
@@ -136,11 +95,9 @@ $observations = $observationModel->getObservations();
                     <label>المستوى</label>
 
                     <select name="niveau" required>
-
                         <option value="info">عادي</option>
                         <option value="attention">تنبيه</option>
                         <option value="grave">خطير</option>
-
                     </select>
 
                 </div>
@@ -151,11 +108,7 @@ $observations = $observationModel->getObservations();
 
                 <label>تفاصيل الملاحظة</label>
 
-                <textarea
-                    name="message"
-                    placeholder="اكتب تفاصيل الملاحظة هنا..."
-                    required
-                ></textarea>
+                <textarea name="message" placeholder="اكتب تفاصيل الملاحظة هنا..." required></textarea>
 
             </div>
 
@@ -171,77 +124,61 @@ $observations = $observationModel->getObservations();
 
         <h2>لائحة الملاحظات</h2>
 
-        <table>
+        <div class="table-scroll">
 
-            <thead>
+            <table>
 
-                <tr>
-                    <th>رقم اللائحة</th>
-                    <th>نوع اللائحة</th>
-                    <th>المصلحة</th>
-                    <th>نوع الملاحظة</th>
-                    <th>التفاصيل</th>
-                    <th>المستوى</th>
-                    <th>التاريخ</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>رقم اللائحة</th>
+                        <th>نوع اللائحة</th>
+                        <th>المصلحة</th>
+                        <th>نوع الملاحظة</th>
+                        <th>التفاصيل</th>
+                        <th>المستوى</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
 
-            </thead>
+                <tbody>
 
-            <tbody>
+                    <?php if (!empty($observations)): ?>
 
-                <?php if (!empty($observations)): ?>
+                        <?php foreach ($observations as $obs): ?>
 
-                    <?php foreach ($observations as $obs): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($obs['id_liste'] ?? '') ?></td>
+                                <td><?= $obs['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?></td>
+                                <td><?= htmlspecialchars($obs['service'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($obs['type_observation'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($obs['message'] ?? '') ?></td>
+                                <td>
+                                    <?php if ($obs['niveau'] == 'grave'): ?>
+                                        <span class="badge danger">خطير</span>
+                                    <?php elseif ($obs['niveau'] == 'attention'): ?>
+                                        <span class="badge warning">تنبيه</span>
+                                    <?php else: ?>
+                                        <span class="badge info">عادي</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= htmlspecialchars($obs['date_observation'] ?? '') ?></td>
+                            </tr>
+
+                        <?php endforeach; ?>
+
+                    <?php else: ?>
 
                         <tr>
-
-                            <td><?= $obs['id_liste'] ?></td>
-
-                            <td>
-                                <?= $obs['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?>
-                            </td>
-
-                            <td><?= $obs['service'] ?></td>
-
-                            <td><?= $obs['type_observation'] ?></td>
-
-                            <td><?= $obs['message'] ?></td>
-
-                            <td>
-
-                                <?php if ($obs['niveau'] == 'grave'): ?>
-
-                                    <span class="badge danger">خطير</span>
-
-                                <?php elseif ($obs['niveau'] == 'attention'): ?>
-
-                                    <span class="badge warning">تنبيه</span>
-
-                                <?php else: ?>
-
-                                    <span class="badge info">عادي</span>
-
-                                <?php endif; ?>
-
-                            </td>
-
-                            <td><?= $obs['date_observation'] ?></td>
-
+                            <td colspan="7">لا توجد ملاحظات حاليا</td>
                         </tr>
 
-                    <?php endforeach; ?>
+                    <?php endif; ?>
 
-                <?php else: ?>
+                </tbody>
 
-                    <tr>
-                        <td colspan="7">لا توجد ملاحظات حاليا</td>
-                    </tr>
+            </table>
 
-                <?php endif; ?>
-
-            </tbody>
-
-        </table>
+        </div>
 
     </div>
 

@@ -21,135 +21,61 @@ $controles = $controleModel->getControles();
 
     <div class="box">
 
-        <h2>
-            نتائج المراقبة التلقائية
-        </h2>
+        <h2>نتائج المراقبة التلقائية</h2>
 
-        <table>
+        <div class="table-scroll">
 
-            <thead>
+            <table>
 
-                <tr>
+                <thead>
+                    <tr>
+                        <th>الاسم الكامل</th>
+                        <th>رقم التأجير</th>
+                        <th>نوع المراقبة</th>
+                        <th>الملاحظة</th>
+                        <th>المستوى</th>
+                        <th>التاريخ</th>
+                    </tr>
+                </thead>
 
-                    <th>
-                        الاسم الكامل
-                    </th>
+                <tbody>
 
-                    <th>
-                        رقم التأجير
-                    </th>
+                    <?php if (!empty($controles)): ?>
 
-                    <th>
-                        نوع المراقبة
-                    </th>
+                        <?php foreach ($controles as $controle): ?>
 
-                    <th>
-                        الملاحظة
-                    </th>
+                            <tr>
+                                <td><?= htmlspecialchars($controle['nom_complet'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($controle['numero_tajir'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($controle['type_controle'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($controle['message'] ?? '') ?></td>
+                                <td>
+                                    <?php if ($controle['niveau'] == 'grave'): ?>
+                                        <span class="badge danger">خطير</span>
+                                    <?php elseif ($controle['niveau'] == 'attention'): ?>
+                                        <span class="badge warning">تنبيه</span>
+                                    <?php else: ?>
+                                        <span class="badge info">معلومة</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= htmlspecialchars($controle['date_controle'] ?? '') ?></td>
+                            </tr>
 
-                    <th>
-                        المستوى
-                    </th>
+                        <?php endforeach; ?>
 
-                    <th>
-                        التاريخ
-                    </th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                <?php if(!empty($controles)): ?>
-
-                    <?php foreach($controles as $controle): ?>
+                    <?php else: ?>
 
                         <tr>
-
-                            <td>
-                                <?= $controle['nom_complet'] ?>
-                            </td>
-
-                            <td>
-                                <?= $controle['numero_tajir'] ?>
-                            </td>
-
-                            <td>
-
-                                <?= $controle['type_controle'] ?>
-
-                            </td>
-
-                            <td>
-
-                                <?= $controle['message'] ?>
-
-                            </td>
-
-                            <td>
-
-                                <?php if(
-                                    $controle['niveau']
-                                    == 'grave'
-                                ): ?>
-
-                                    <span class="badge danger">
-
-                                        خطير
-
-                                    </span>
-
-                                <?php elseif(
-                                    $controle['niveau']
-                                    == 'attention'
-                                ): ?>
-
-                                    <span class="badge warning">
-
-                                        تنبيه
-
-                                    </span>
-
-                                <?php else: ?>
-
-                                    <span class="badge info">
-
-                                        معلومة
-
-                                    </span>
-
-                                <?php endif; ?>
-
-                            </td>
-
-                            <td>
-
-                                <?= $controle['date_controle'] ?>
-
-                            </td>
-
+                            <td colspan="6">لا توجد مخالفات أو ملاحظات حاليا</td>
                         </tr>
 
-                    <?php endforeach; ?>
+                    <?php endif; ?>
 
-                <?php else: ?>
+                </tbody>
 
-                    <tr>
+            </table>
 
-                        <td colspan="6">
-
-                            لا توجد مخالفات أو ملاحظات حاليا
-
-                        </td>
-
-                    </tr>
-
-                <?php endif; ?>
-
-            </tbody>
-
-        </table>
+        </div>
 
     </div>
 

@@ -8,11 +8,11 @@ $listeModel = new Liste();
 $observationModel = new Observation();
 
 $totalPermanences = $listeModel->countPermanences();
-$totalHeuresSupp = $listeModel->countHeuresSupp();
+$totalHeuresSupp  = $listeModel->countHeuresSupp();
 
-$statuts = $listeModel->countByStatut();
+$statuts  = $listeModel->countByStatut();
 $services = $listeModel->countByService();
-$niveaux = $observationModel->countByNiveau();
+$niveaux  = $observationModel->countByNiveau();
 
 ?>
 
@@ -29,12 +29,12 @@ $niveaux = $observationModel->countByNiveau();
 
         <div class="card">
             <h3>لوائح الديمومة</h3>
-            <p><?= $totalPermanences ?></p>
+            <p><?= intval($totalPermanences) ?></p>
         </div>
 
         <div class="card">
             <h3>الساعات الإضافية</h3>
-            <p><?= $totalHeuresSupp ?></p>
+            <p><?= intval($totalHeuresSupp) ?></p>
         </div>
 
     </div>
@@ -72,60 +72,88 @@ $niveaux = $observationModel->countByNiveau();
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-const typeLabels = ["الديمومة", "الساعات الإضافية"];
-const typeData = [
-    <?= $totalPermanences ?>,
-    <?= $totalHeuresSupp ?>
-];
+Chart.defaults.font.family = "Tahoma, Arial, sans-serif";
+Chart.defaults.font.size = 13;
 
-const statutLabels = <?= json_encode(array_column($statuts, 'statut'), JSON_UNESCAPED_UNICODE) ?>;
-const statutData = <?= json_encode(array_column($statuts, 'total')) ?>;
-
-const niveauLabels = <?= json_encode(array_column($niveaux, 'niveau'), JSON_UNESCAPED_UNICODE) ?>;
-const niveauData = <?= json_encode(array_column($niveaux, 'total')) ?>;
-
-const serviceLabels = <?= json_encode(array_column($services, 'service'), JSON_UNESCAPED_UNICODE) ?>;
-const serviceData = <?= json_encode(array_column($services, 'total')) ?>;
+const paletteBlue   = ["#2563eb", "#0ea5e9", "#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981", "#ef4444", "#14b8a6"];
+const paletteStatus = ["#16a34a", "#dc2626", "#f59e0b"];
+const paletteNiveau = ["#2563eb", "#f59e0b", "#dc2626"];
 
 new Chart(document.getElementById("typeChart"), {
     type: "doughnut",
     data: {
-        labels: typeLabels,
+        labels: ["الديمومة", "الساعات الإضافية"],
         datasets: [{
-            data: typeData
+            data: [<?= intval($totalPermanences) ?>, <?= intval($totalHeuresSupp) ?>],
+            backgroundColor: ["#2563eb", "#0ea5e9"],
+            borderWidth: 3,
+            borderColor: "#fff"
         }]
+    },
+    options: {
+        plugins: {
+            legend: { position: "bottom" }
+        },
+        cutout: "60%"
     }
 });
 
 new Chart(document.getElementById("statutChart"), {
     type: "bar",
     data: {
-        labels: statutLabels,
+        labels: <?= json_encode(array_column($statuts, 'statut'), JSON_UNESCAPED_UNICODE) ?>,
         datasets: [{
             label: "عدد اللوائح",
-            data: statutData
+            data: <?= json_encode(array_column($statuts, 'total')) ?>,
+            backgroundColor: paletteStatus,
+            borderRadius: 8,
+            borderSkipped: false
         }]
+    },
+    options: {
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+            x: { grid: { display: false } }
+        }
     }
 });
 
 new Chart(document.getElementById("niveauChart"), {
     type: "pie",
     data: {
-        labels: niveauLabels,
+        labels: <?= json_encode(array_column($niveaux, 'niveau'), JSON_UNESCAPED_UNICODE) ?>,
         datasets: [{
-            data: niveauData
+            data: <?= json_encode(array_column($niveaux, 'total')) ?>,
+            backgroundColor: paletteNiveau,
+            borderWidth: 3,
+            borderColor: "#fff"
         }]
+    },
+    options: {
+        plugins: { legend: { position: "bottom" } }
     }
 });
 
 new Chart(document.getElementById("serviceChart"), {
     type: "bar",
     data: {
-        labels: serviceLabels,
+        labels: <?= json_encode(array_column($services, 'service'), JSON_UNESCAPED_UNICODE) ?>,
         datasets: [{
             label: "عدد اللوائح",
-            data: serviceData
+            data: <?= json_encode(array_column($services, 'total')) ?>,
+            backgroundColor: paletteBlue,
+            borderRadius: 8,
+            borderSkipped: false
         }]
+    },
+    options: {
+        indexAxis: "y",
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { beginAtZero: true, ticks: { stepSize: 1 } },
+            y: { grid: { display: false } }
+        }
     }
 });
 </script>

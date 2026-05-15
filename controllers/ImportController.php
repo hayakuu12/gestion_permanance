@@ -1,20 +1,22 @@
 <?php
 
-require_once 'models/Liste.php';
-require_once 'models/Controle.php';
 require_once 'controllers/GeminiController.php';
+require_once 'models/Liste.php';
+require_once 'models/Observation.php';
 
 class ImportController
 {
-    private $listeModel;
-    private $controleModel;
     private $gemini;
+    private $listeModel;
+    private $observationModel;
+    private $employeModel;
 
     public function __construct()
     {
-        $this->listeModel = new Liste();
-        $this->controleModel = new Controle();
-        $this->gemini = new GeminiController();
+        $this->gemini           = new GeminiController();
+        $this->listeModel       = new Liste();
+        $this->observationModel = new Observation();
+        $this->employeModel     = new Employe();
     }
 
     public function importerPDF($file, $type_liste, $trimestre, $annee, $service)
@@ -22,68 +24,122 @@ class ImportController
         if ($file['error'] != 0) {
             return [
                 "success" => false,
-                "manual" => true,
-                "message" => "خطأ أثناء رفع الملف"
+                "message" => "خطأ أثناء رفع الملف",
+                "manual" => false
             ];
         }
 
-        if (!is_dir("uploads")) {
-            mkdir("uploads", 0777, true);
+        $uploadDir = "uploads/";
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
         }
 
-        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $fileName = time() . "_" . basename($file['name']);
+        $filePath = $uploadDir . $fileName;
 
-        if ($extension != "pdf") {
-            return [
-                "success" => false,
-                "manual" => true,
-                "message" => "يجب رفع ملف PDF فقط"
-            ];
-        }
-
-        $nomFichier = time() . "_" . $file['name'];
-        $chemin = "uploads/" . $nomFichier;
-
-        move_uploaded_file($file['tmp_name'], $chemin);
+        move_uploaded_file($file['tmp_name'], $filePath);
 
         $id_liste = $this->listeModel->ajouterListe(
             $type_liste,
             $trimestre,
             $annee,
             $service,
-            $nomFichier
+            $filePath
         );
 
-        $data = $this->gemini->extractFromPdf($chemin, $type_liste);
+        $rows = $this->gemini->extractFromPdf($filePath, $type_liste, $trimestre);
 
-        if (empty($data)) {
+        if (empty($rows)) {
             return [
                 "success" => false,
+                "message" => "تعذر استخراج البيانات",
                 "manual" => true,
-                "id_liste" => $id_liste,
-                "message" => "تم رفع PDF لكن تعذر استخراج المعطيات تلقائياً."
+                "id_liste" => $id_liste
             ];
         }
 
-        $count = 0;
+        $seen         = [];
+        $seenWarnings = [];
+        $inserted     = 0;
 
-        foreach ($data as $row) {
+        foreach ($rows as $row) {
 
             $nom_complet = trim($row['nom_complet'] ?? '');
             $numero_tajir = trim($row['numero_tajir'] ?? '');
             $cin = trim($row['cin'] ?? '');
             $cadre = trim($row['cadre'] ?? '');
-            $travaux = trim($row['travaux'] ?? '');
 
             $date_debut = $row['date_debut'] ?? null;
             $date_fin = $row['date_fin'] ?? null;
 
+            $jour = trim($row['jour'] ?? '');
+            $type_jour = trim($row['type_jour'] ?? '');
+
             $mois = intval($row['mois'] ?? 0);
             $valeur = floatval($row['valeur'] ?? 0);
+            $travaux = trim($row['travaux'] ?? '');
 
-            if ($nom_complet == "" || $numero_tajir == "" || $mois == 0) {
+            if ($nom_complet == "" && $numero_tajir == "" && $cin == "") {
                 continue;
             }
+
+            /* CHECK: هل الموظف مسجل في قاعدة البيانات؟ */
+            if ($numero_tajir != "" && !isset($seenWarnings[$numero_tajir])) {
+                $employeExiste = $this->employeModel->getEmployeByTajir($numero_tajir);
+                if (!$employeExiste) {
+                    $this->observationModel->ajouterObservation(
+                        $id_liste,
+                        "موظف غير مسجل",
+                        "رقم التأجير " . $numero_tajir . " (" . $nom_complet . ") غير موجود في قاعدة بيانات الموظفين",
+                        "grave"
+                    );
+                }
+                $seenWarnings[$numero_tajir] = true;
+            }
+
+            if ($mois == 0 && !empty($date_debut)) {
+                $mois = intval(date("m", strtotime($date_debut)));
+            }
+
+            if ($mois == 0) {
+                $mois = 1;
+            }
+
+            if ($type_liste == "permanence") {
+
+                /*
+                    مهم:
+                    نفس الموظف مسموح يتكرر إذا التاريخ مختلف.
+                    منع التكرار يكون بالتاريخ، ماشي بالاسم فقط.
+                */
+
+                $key = strtolower(
+                    $numero_tajir . "_" .
+                    $cin . "_" .
+                    $date_debut . "_" .
+                    $date_fin . "_" .
+                    $type_jour
+                );
+
+            } else {
+
+                $key = strtolower(
+                    $numero_tajir . "_" .
+                    $nom_complet . "_" .
+                    $mois . "_" .
+                    $valeur . "_" .
+                    $travaux
+                );
+            }
+
+            $key = preg_replace('/\s+/', '', $key);
+
+            if (isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
 
             $nombre_jours = 0;
             $nombre_heures = 0;
@@ -101,6 +157,8 @@ class ImportController
                 $cin,
                 $cadre,
                 $mois,
+                $jour,
+                $type_jour,
                 $nombre_jours,
                 $nombre_heures,
                 $travaux,
@@ -108,25 +166,41 @@ class ImportController
                 $date_fin
             );
 
-            $count++;
+            $inserted++;
+
+            if ($numero_tajir == "") {
+                $this->observationModel->ajouterObservation(
+                    $id_liste,
+                    "رقم التأجير",
+                    "رقم التأجير غير موجود",
+                    "attention"
+                );
+            }
+
+            if ($type_liste == "heures_supp" && $travaux == "") {
+                $this->observationModel->ajouterObservation(
+                    $id_liste,
+                    "الأشغال",
+                    "الأشغال المنجزة غير موجودة",
+                    "attention"
+                );
+            }
         }
 
-        if ($count == 0) {
+        if ($inserted == 0) {
             return [
                 "success" => false,
+                "message" => "لم يتم إدخال أي معطيات صالحة",
                 "manual" => true,
-                "id_liste" => $id_liste,
-                "message" => "لم يتم العثور على معطيات صالحة داخل الملف."
+                "id_liste" => $id_liste
             ];
         }
 
-        $this->lancerControles($id_liste, $type_liste);
-
         return [
             "success" => true,
+            "message" => "تم استيراد الملف بنجاح",
             "manual" => false,
-            "id_liste" => $id_liste,
-            "message" => "تم استخراج المعطيات بواسطة Gemini بنجاح"
+            "id_liste" => $id_liste
         ];
     }
 
@@ -138,58 +212,37 @@ class ImportController
         $cin,
         $cadre,
         $mois,
+        $jour,
+        $type_jour,
         $valeur,
-        $travaux = null,
+        $nombre_heures = 0,
+        $travaux = "",
         $date_debut = null,
         $date_fin = null
     ) {
         $nombre_jours = 0;
-        $nombre_heures = 0;
+        $heures = 0;
 
         if ($type_liste == "permanence") {
             $nombre_jours = $valeur;
         } else {
-            $nombre_heures = $valeur;
+            $heures = $valeur;
         }
 
-        $this->listeModel->ajouterElement(
+        return $this->listeModel->ajouterElement(
             $id_liste,
             $nom_complet,
             $numero_tajir,
             $cin,
             $cadre,
             $mois,
+            $jour,
+            $type_jour,
             $nombre_jours,
-            $nombre_heures,
+            $heures,
             $travaux,
             $date_debut,
             $date_fin
         );
-
-        $this->lancerControles($id_liste, $type_liste);
-    }
-
-    private function lancerControles($id_liste, $type_liste)
-    {
-        $elements = $this->listeModel->getElementsByListe($id_liste);
-
-        foreach ($elements as $element) {
-
-            if ($type_liste == "permanence") {
-                $this->controleModel->verifierDepassementPermanence(
-                    $element['id_element'],
-                    $element['nombre_jours']
-                );
-            }
-
-            if ($type_liste == "heures_supp") {
-                $this->controleModel->verifierDepassementHeures(
-                    $element['id_element'],
-                    $element['nombre_heures']
-                );
-            }
-        }
-
-        $this->controleModel->verifierConflitPermanenceHeures();
     }
 }

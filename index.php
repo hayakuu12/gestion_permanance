@@ -25,6 +25,9 @@ switch ($page) {
     case 'statistiques':
         require 'views/statistiques.php';
         break;
+    case 'services':
+        require 'views/services.php';
+        break;
     default:
         require 'views/dashboard.php';
         break;

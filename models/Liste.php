@@ -47,89 +47,55 @@ class Liste
     }
 
     public function ajouterElement(
-
         $id_liste,
-
         $nom_complet,
-
         $numero_tajir,
-
         $cin,
-
         $cadre,
-
         $mois,
-
+        $jour,
+        $type_jour,
         $nombre_jours,
-
         $nombre_heures,
-
         $travaux = null,
-
         $date_debut = null,
-
         $date_fin = null
-
     ) {
-
         $sql = "
-
-            INSERT INTO elements_liste (
-
-                id_liste,
-
-                nom_complet,
-
-                numero_tajir,
-
-                cin,
-
-                cadre,
-
-                mois,
-
-                nombre_jours,
-
-                nombre_heures,
-
-                travaux,
-
-                date_debut,
-
-                date_fin
-
-            )
-
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-
-        ";
+        INSERT INTO elements_liste (
+            id_liste,
+            nom_complet,
+            numero_tajir,
+            cin,
+            cadre,
+            mois,
+            jour,
+            type_jour,
+            nombre_jours,
+            nombre_heures,
+            travaux,
+            date_debut,
+            date_fin
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ";
 
         $stmt = $this->conn->prepare($sql);
 
         return $stmt->execute([
-
             $id_liste,
-
             $nom_complet,
-
             $numero_tajir,
-
             $cin,
-
             $cadre,
-
             $mois,
-
+            $jour,
+            $type_jour,
             $nombre_jours,
-
             $nombre_heures,
-
             $travaux,
-
             $date_debut,
-
             $date_fin
-
         ]);
     }
 
@@ -218,90 +184,56 @@ class Liste
     }
 
     public function updateElement(
-
         $id_element,
-
         $nom_complet,
-
         $numero_tajir,
-
         $cin,
-
         $cadre,
-
         $mois,
-
+        $jour,
+        $type_jour,
         $nombre_jours,
-
         $nombre_heures,
-
         $travaux,
-
         $date_debut,
-
         $date_fin
-
     ) {
-
         $sql = "
-
-            UPDATE elements_liste
-
-            SET
-
-                nom_complet = ?,
-
-                numero_tajir = ?,
-
-                cin = ?,
-
-                cadre = ?,
-
-                mois = ?,
-
-                nombre_jours = ?,
-
-                nombre_heures = ?,
-
-                travaux = ?,
-
-                date_debut = ?,
-
-                date_fin = ?
-
-            WHERE id_element = ?
-
-        ";
+        UPDATE elements_liste
+        SET
+            nom_complet = ?,
+            numero_tajir = ?,
+            cin = ?,
+            cadre = ?,
+            mois = ?,
+            jour = ?,
+            type_jour = ?,
+            nombre_jours = ?,
+            nombre_heures = ?,
+            travaux = ?,
+            date_debut = ?,
+            date_fin = ?
+        WHERE id_element = ?
+    ";
 
         $stmt = $this->conn->prepare($sql);
 
         return $stmt->execute([
-
             $nom_complet,
-
             $numero_tajir,
-
             $cin,
-
             $cadre,
-
             $mois,
-
+            $jour,
+            $type_jour,
             $nombre_jours,
-
             $nombre_heures,
-
             $travaux,
-
             $date_debut,
-
             $date_fin,
-
             $id_element
-
         ]);
     }
-
     public function countByType($type)
     {
         $sql = "
@@ -528,6 +460,81 @@ class Liste
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
+
+    public function getStatsByService()
+    {
+        $sql = "
+            SELECT
+                l.service,
+                l.type_liste,
+                COUNT(e.id_element) as total_elements
+            FROM elements_liste e
+            INNER JOIN listes l ON e.id_liste = l.id_liste
+            WHERE l.service != '' AND l.service IS NOT NULL
+            GROUP BY l.service, l.type_liste
+            ORDER BY l.service
+        ";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $result = [];
+        foreach ($rows as $row) {
+            $service = $row['service'];
+            if (!isset($result[$service])) {
+                $result[$service] = [
+                    'service'     => $service,
+                    'permanence'  => 0,
+                    'heures_supp' => 0,
+                ];
+            }
+            $result[$service][$row['type_liste']] = intval($row['total_elements']);
+        }
+
+        return array_values($result);
+    }
+
+    public function elementExiste(
+    $id_liste,
+    $numero_tajir,
+    $mois,
+    $jour = null
+){
+    $sql = "
+        SELECT COUNT(*) as total
+
+        FROM elements_liste
+
+        WHERE
+            id_liste = ?
+            AND numero_tajir = ?
+            AND mois = ?
+    ";
+
+    $params = [
+        $id_liste,
+        $numero_tajir,
+        $mois
+    ];
+
+    if($jour != null){
+
+        $sql .= "
+            AND jour = ?
+        ";
+
+        $params[] = $jour;
+    }
+
+    $stmt =
+    $this->conn->prepare($sql);
+
+    $stmt->execute($params);
+
+    return $stmt->fetch()['total'] > 0;
+}
+
 
 }

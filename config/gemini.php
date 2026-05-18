@@ -2,6 +2,6 @@
 
 define(
     'GEMINI_API_KEY',
-    'AIzaSyAkwyxCekOUN76tysB4pkkxSnILWaQznQo'
+    'AIzaSyC5qsXmAzKThapAjepbpqQDTJ79aB5c44w'
 );
 ?>

@@ -14,12 +14,17 @@ class Employe
 
     public function getEmployeByTajir($numero_tajir)
     {
-        $sql = "SELECT * FROM employes WHERE numero_tajir = ? LIMIT 1";
-
+        $sql = "SELECT * FROM employees WHERE id = ? LIMIT 1";
         $stmt = $this->conn->prepare($sql);
-
         $stmt->execute([$numero_tajir]);
-
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function createEmploye($numero_tajir, $full_name, $position = '', $department_id = '')
+    {
+        $ts   = (int)(microtime(true) * 1000);
+        $sql  = "INSERT IGNORE INTO employees (id, full_name, position, department_id, created_at) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([$numero_tajir, $full_name ?: $numero_tajir, $position ?: '', $department_id, $ts]);
     }
 }

@@ -12,10 +12,6 @@ switch ($page) {
         require 'views/heures_supp.php';
         break;
 
-    case 'controles':
-        require 'views/controles.php';
-        break;
-
     case 'rapports':
         require 'views/rapports.php';
         break;

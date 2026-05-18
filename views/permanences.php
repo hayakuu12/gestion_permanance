@@ -35,21 +35,21 @@ if (isset($_POST['ajouter_manuel'])) {
 
     $importController = new ImportController();
 
+    $date_debut = $_POST['date_debut'] ?? null;
+    $date_fin   = !empty($_POST['date_fin']) ? $_POST['date_fin'] : $date_debut;
+
     $importController->ajouterManuel(
         $_POST['id_liste'],
         "permanence",
         $_POST['nom_complet'],
         $_POST['numero_tajir'],
-        $_POST['cin'],
-        $_POST['cadre'],
-        $_POST['mois'],
-        $_POST['jour'],
+        $_POST['cin'] ?? '',
+        $_POST['cadre'] ?? '',
+        0, '',
         $_POST['type_jour'],
-        $_POST['nombre_jours'],
-        0,
-        "",
-        null,
-        null
+        intval($_POST['nombre_jours'] ?? 1),
+        0, '',
+        $date_debut, $date_fin
     );
 
     $success = "تمت إضافة معطيات الديمومة يدوياً";
@@ -59,16 +59,14 @@ if (isset($_POST['modifier'])) {
 
     $listeModel->updateElement(
         $_POST['id_element'],
-        $_POST['nom_complet'],
-        $_POST['numero_tajir'],
-        $_POST['cin'],
-        $_POST['cadre'],
-        $_POST['mois'],
-        $_POST['jour'],
-        $_POST['type_jour'],
-        $_POST['nombre_jours'],
-        0,
-        "",
+        $_POST['nom_complet'] ?? '',
+        $_POST['numero_tajir'] ?? '',
+        '',
+        $_POST['cadre'] ?? '',
+        0, '',
+        $_POST['type_jour'] ?? '',
+        intval($_POST['nombre_jours'] ?? 0),
+        0, '',
         $_POST['date_debut'] ?: null,
         $_POST['date_fin'] ?: null
     );
@@ -79,27 +77,12 @@ if (isset($_POST['modifier'])) {
 $permanences = $listeModel->getElementsByType("permanence");
 
 function classifyPermanenceDate($p) {
-    $dateDeb = $p['date_debut'] ?? '';
-    $jour    = $p['jour']      ?? '';
-    $type    = $p['type_jour'] ?? '';
-    if (!empty($dateDeb)) {
-        $n = (int) date('N', strtotime($dateDeb));
-        if ($n === 6 || $n === 7) return 'weekend';
-    }
+    $dt = $p['date_type'] ?? '';
+    if ($dt === 'HOLIDAY') return 'ferie';
+    if ($dt === 'WEEKEND') return 'weekend';
+    $jour = $p['jour'] ?? '';
     if ($jour === 'السبت' || $jour === 'الأحد') return 'weekend';
-    if (mb_strpos($type, 'نهاية الأسبوع') !== false) return 'weekend';
-    if (!empty($type)) return 'ferie';
     return 'normal';
-}
-
-function getPermanenceDateLabel($p) {
-    static $mn = [
-        1=>'يناير',2=>'فبراير',3=>'مارس',4=>'أبريل',5=>'ماي',6=>'يونيو',
-        7=>'يوليوز',8=>'غشت',9=>'شتنبر',10=>'أكتوبر',11=>'نونبر',12=>'دجنبر'
-    ];
-    if (!empty($p['date_debut'])) return date('d/m/Y', strtotime($p['date_debut']));
-    $m = $mn[intval($p['mois'] ?? 0)] ?? ($p['mois'] ?? '');
-    return trim(($p['jour'] ?? '') . ' ' . $m);
 }
 
 $grouped_perm = [];
@@ -112,8 +95,6 @@ foreach ($permanences as $p) {
             'cin'          => $p['cin']           ?? '',
             'cadre'        => $p['cadre']         ?? '',
             'service'      => $p['service']       ?? '',
-            'trimestre'    => $p['trimestre']     ?? '',
-            'annee'        => $p['annee']         ?? '',
             'statut'       => $p['statut']        ?? '',
             'records'      => []
         ];
@@ -190,14 +171,14 @@ foreach ($permanences as $p) {
 
                 </div>
 
-                <label class="upload-card">
+                <label class="upload-card" id="uploadCard">
 
-                    <input type="file" name="permanence" accept=".pdf" required>
+                    <input type="file" name="permanence" accept=".pdf" required id="pdfFileInput">
 
-                    <div class="upload-content">
-                        <div class="upload-icon">⬆️</div>
-                        <div class="upload-title">رفع ملف PDF</div>
-                        <div class="upload-desc">اضغط هنا لاختيار ملف الديمومة</div>
+                    <div class="upload-content" id="uploadContent">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-title" id="uploadTitle">رفع ملف PDF</div>
+                        <div class="upload-desc" id="uploadDesc">اضغط هنا لاختيار ملف الديمومة</div>
                     </div>
 
                 </label>
@@ -250,23 +231,26 @@ foreach ($permanences as $p) {
                 <div class="row">
 
                     <div class="input-group">
-                        <label>الشهر</label>
-                        <input type="number" name="mois" min="1" max="12" required>
+                        <label>تاريخ البداية</label>
+                        <input type="date" name="date_debut" required>
                     </div>
 
                     <div class="input-group">
-                        <label>اليوم</label>
-                        <input type="text" name="jour" placeholder="مثال: الأحد" required>
+                        <label>تاريخ النهاية</label>
+                        <input type="date" name="date_fin">
                     </div>
 
                     <div class="input-group">
                         <label>نوع العطلة</label>
-                        <input type="text" name="type_jour" placeholder="مثال: عطلة نهاية الأسبوع" required>
+                        <select name="type_jour" required>
+                            <option value="عطلة أسبوعية">عطلة أسبوعية</option>
+                            <option value="عيد وطني أو ديني">عيد وطني أو ديني</option>
+                        </select>
                     </div>
 
                     <div class="input-group">
-                        <label>عدد أيام الديمومة</label>
-                        <input type="number" name="nombre_jours" required>
+                        <label>عدد الأيام</label>
+                        <input type="number" name="nombre_jours" value="1" min="1" required>
                     </div>
 
                 </div>
@@ -296,8 +280,6 @@ foreach ($permanences as $p) {
                         <th>CIN</th>
                         <th>الإطار</th>
                         <th>المصلحة</th>
-                        <th>الشطر</th>
-                        <th>السنة</th>
                         <th>أيام الديمومة</th>
                         <th>عطل نهاية الأسبوع</th>
                         <th>أعياد وطنية</th>
@@ -313,20 +295,26 @@ foreach ($permanences as $p) {
                         <?php foreach ($grouped_perm as $g): ?>
 
                             <?php
-                            $allDates     = [];
                             $weekendDates = [];
                             $ferieDates   = [];
+                            $allDates     = [];
                             $totalJours   = 0;
 
                             foreach ($g['records'] as $rec) {
-                                $label = getPermanenceDateLabel($rec);
-                                $cat   = classifyPermanenceDate($rec);
-                                $allDates[] = ['label' => $label, 'cat' => $cat, 'rec' => $rec];
-                                if ($cat === 'weekend') $weekendDates[] = $label;
-                                elseif ($cat === 'ferie') $ferieDates[] = $label;
-                                $totalJours += intval($rec['nombre_jours'] ?? 0);
+                                $cat     = classifyPermanenceDate($rec);
+                                $jour    = $rec['jour'] ?? '';
+                                $type    = $rec['type_jour'] ?? '';
+                                $raw     = $rec['date_debut'] ?? '';
+                                $dateFmt = $raw ? date('d/m/Y', strtotime($raw)) : '';
+                                $lbl     = $dateFmt ?: ($jour ?: $type ?: '—');
+
+                                $allDates[] = ['lbl' => $lbl, 'jour' => $jour, 'type' => $type, 'cat' => $cat];
+
+                                if ($cat === 'weekend') $weekendDates[] = $dateFmt ?: ($jour ?: 'عطلة أسبوعية');
+                                elseif ($cat === 'ferie') $ferieDates[] = $dateFmt ?: ($jour ?: 'عيد');
+
+                                $totalJours++;
                             }
-                            if ($totalJours === 0) $totalJours = count($g['records']);
                             ?>
 
                             <tr>
@@ -335,22 +323,22 @@ foreach ($permanences as $p) {
                                 <td><?= htmlspecialchars($g['cin']) ?></td>
                                 <td><?= htmlspecialchars($g['cadre']) ?></td>
                                 <td><?= htmlspecialchars($g['service']) ?></td>
-                                <td><?= htmlspecialchars($g['trimestre']) ?></td>
-                                <td><?= htmlspecialchars($g['annee']) ?></td>
 
                                 <td class="dates-cell">
                                     <?php foreach ($allDates as $d): ?>
-                                        <span class="date-pill date-<?= $d['cat'] ?>">
-                                            <?= htmlspecialchars($d['label']) ?>
+                                        <span class="date-pill date-<?= $d['cat'] ?>"
+                                              title="<?= htmlspecialchars(trim($d['type'] . ($d['jour'] ? ' - ' . $d['jour'] : ''), ' -')) ?>">
+                                            <?= htmlspecialchars($d['lbl']) ?>
                                         </span>
                                     <?php endforeach; ?>
                                 </td>
 
                                 <td class="dates-cell">
                                     <?php if (!empty($weekendDates)): ?>
-                                        <?php foreach ($weekendDates as $wd): ?>
+                                        <?php foreach (array_unique($weekendDates) as $wd): ?>
                                             <span class="date-pill date-weekend"><?= htmlspecialchars($wd) ?></span>
                                         <?php endforeach; ?>
+                                        <small class="month-label">(<?= count($weekendDates) ?> يوم)</small>
                                     <?php else: ?>
                                         <span class="no-date">—</span>
                                     <?php endif; ?>
@@ -358,9 +346,10 @@ foreach ($permanences as $p) {
 
                                 <td class="dates-cell">
                                     <?php if (!empty($ferieDates)): ?>
-                                        <?php foreach ($ferieDates as $fd): ?>
+                                        <?php foreach (array_unique($ferieDates) as $fd): ?>
                                             <span class="date-pill date-ferie"><?= htmlspecialchars($fd) ?></span>
                                         <?php endforeach; ?>
+                                        <small class="month-label">(<?= count($ferieDates) ?> يوم)</small>
                                     <?php else: ?>
                                         <span class="no-date">—</span>
                                     <?php endif; ?>
@@ -370,8 +359,9 @@ foreach ($permanences as $p) {
 
                                 <td class="edit-btns-cell">
                                     <?php foreach ($g['records'] as $rec): ?>
-                                        <button type="button" class="btn-edit btn-sm" onclick="ouvrirModification(<?= htmlspecialchars(json_encode($rec), ENT_QUOTES) ?>)">
-                                            ✏ <?= htmlspecialchars(getPermanenceDateLabel($rec)) ?>
+                                        <button type="button" class="btn-edit btn-sm"
+                                            onclick="ouvrirModification(<?= htmlspecialchars(json_encode($rec), ENT_QUOTES) ?>)">
+                                            ✏ <?= htmlspecialchars(($rec['date_debut'] ?? '') ? date('d/m/Y', strtotime($rec['date_debut'])) : ($rec['jour'] ?? $rec['type_jour'] ?? '—')) ?>
                                         </button>
                                     <?php endforeach; ?>
                                 </td>
@@ -382,7 +372,7 @@ foreach ($permanences as $p) {
                     <?php else: ?>
 
                         <tr>
-                            <td colspan="12">لا توجد معطيات ديمومة حاليا</td>
+                            <td colspan="10">لا توجد معطيات ديمومة حاليا</td>
                         </tr>
 
                     <?php endif; ?>
@@ -418,11 +408,6 @@ foreach ($permanences as $p) {
                 </div>
 
                 <div class="input-group">
-                    <label>رقم البطاقة الوطنية</label>
-                    <input type="text" name="cin" id="m_cin">
-                </div>
-
-                <div class="input-group">
                     <label>الإطار</label>
                     <input type="text" name="cadre" id="m_cadre">
                 </div>
@@ -437,23 +422,16 @@ foreach ($permanences as $p) {
             <div class="row">
 
                 <div class="input-group">
-                    <label>الشهر</label>
-                    <input type="number" name="mois" id="m_mois" min="1" max="12">
-                </div>
-
-                <div class="input-group">
-                    <label>اليوم</label>
-                    <input type="text" name="jour" id="m_jour">
-                </div>
-
-                <div class="input-group">
                     <label>نوع العطلة</label>
-                    <input type="text" name="type_jour" id="m_type_jour">
+                    <select name="type_jour" id="m_type_jour">
+                        <option value="عطلة أسبوعية">عطلة أسبوعية</option>
+                        <option value="عيد وطني أو ديني">عيد وطني أو ديني</option>
+                    </select>
                 </div>
 
                 <div class="input-group">
-                    <label>عدد أيام الديمومة</label>
-                    <input type="number" name="nombre_jours" id="m_nombre_jours">
+                    <label>عدد الأيام</label>
+                    <input type="number" name="nombre_jours" id="m_nombre_jours" min="1">
                 </div>
 
             </div>
@@ -483,51 +461,60 @@ foreach ($permanences as $p) {
 </div>
 
 <script>
+/* File selection notification */
+const pdfInput = document.getElementById('pdfFileInput');
+if (pdfInput) {
+    pdfInput.addEventListener('change', function () {
+        const title = document.getElementById('uploadTitle');
+        const desc  = document.getElementById('uploadDesc');
+        const card  = document.getElementById('uploadCard');
+        if (this.files && this.files[0]) {
+            title.textContent = '✅ ' + this.files[0].name;
+            desc.textContent  = 'تم اختيار الملف — اضغط على زر الاستيراد للمتابعة';
+            card.style.borderColor = '#16a34a';
+        }
+    });
+}
+
+/* AJAX employee lookup */
 const numeroTajirInput = document.getElementById('numero_tajir');
-
 if (numeroTajirInput) {
-
     numeroTajirInput.addEventListener('keyup', function () {
-
         let numero = this.value.trim();
-
         if (numero.length < 1) return;
-
         fetch('ajax/get_employe.php?numero_tajir=' + encodeURIComponent(numero))
             .then(response => response.json())
             .then(data => {
-
                 const nomInput = document.getElementById('nom_complet');
-                const message = document.getElementById('tajir_message');
-
-                if (data && data.nom_complet) {
-                    nomInput.value = data.nom_complet;
-                    message.innerHTML = "✅ الموظف موجود";
+                const message  = document.getElementById('tajir_message');
+                const name     = data && (data.full_name || data.nom_complet);
+                if (name) {
+                    nomInput.value      = name;
+                    message.innerHTML   = "✅ الموظف موجود";
                     message.style.color = "green";
                 } else {
-                    nomInput.value = "";
-                    message.innerHTML = "❌ رقم التأجير غير موجود";
+                    nomInput.value      = "";
+                    message.innerHTML   = "❌ رقم التأجير غير موجود";
                     message.style.color = "red";
                 }
-
             });
-
     });
-
 }
 
 function ouvrirModification(data) {
-    document.getElementById('m_id_element').value   = data.id_element   ?? '';
-    document.getElementById('m_nom_complet').value  = data.nom_complet  ?? '';
-    document.getElementById('m_numero_tajir').value = data.numero_tajir ?? '';
-    document.getElementById('m_cin').value          = data.cin          ?? '';
-    document.getElementById('m_cadre').value        = data.cadre        ?? '';
-    document.getElementById('m_mois').value         = data.mois         ?? '';
-    document.getElementById('m_jour').value         = data.jour         ?? '';
-    document.getElementById('m_type_jour').value    = data.type_jour    ?? '';
-    document.getElementById('m_nombre_jours').value = data.nombre_jours ?? '';
-    document.getElementById('m_date_debut').value   = data.date_debut   ?? '';
-    document.getElementById('m_date_fin').value     = data.date_fin     ?? '';
+    document.getElementById('m_id_element').value    = data.id_element   ?? '';
+    document.getElementById('m_nom_complet').value   = data.nom_complet  ?? '';
+    document.getElementById('m_numero_tajir').value  = data.numero_tajir ?? '';
+    document.getElementById('m_cadre').value         = data.cadre        ?? '';
+    document.getElementById('m_nombre_jours').value  = data.nombre_jours ?? '1';
+    document.getElementById('m_date_debut').value    = data.date_debut   ?? '';
+    document.getElementById('m_date_fin').value      = data.date_fin     ?? '';
+
+    const tj = document.getElementById('m_type_jour');
+    const tv = data.type_jour ?? '';
+    for (let i = 0; i < tj.options.length; i++) {
+        tj.options[i].selected = (tj.options[i].value === tv);
+    }
 
     document.getElementById('modalEdit').classList.add('active');
 }

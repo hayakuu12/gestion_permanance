@@ -1,45 +1,63 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-    // active sidebar
-    const currentUrl = window.location.href;
-
-    document.querySelectorAll(".sidebar a").forEach(link => {
-        if (currentUrl.includes(link.getAttribute("href"))) {
-            link.style.background = "#2563eb";
-            link.style.color = "white";
-        }
-    });
-
-    // show selected upload file name
-    document.querySelectorAll(".upload-card input").forEach(input => {
-        input.addEventListener("change", function () {
-            const fileName = this.files[0]?.name;
-            const desc = this.closest(".upload-card").querySelector(".upload-desc");
-            if (fileName && desc) {
-                desc.innerHTML = "✅ تم اختيار الملف: " + fileName;
-                desc.style.color = "#16a34a";
+    /* ── Upload: show filename ── */
+    document.querySelectorAll('.upload-card input[type="file"]').forEach(input => {
+        input.addEventListener('change', function () {
+            const file  = this.files[0];
+            const card  = this.closest('.upload-card');
+            const title = card?.querySelector('.upload-title');
+            const desc  = card?.querySelector('.upload-desc');
+            if (file && title) {
+                title.textContent = '✅ ' + file.name;
+                if (desc) desc.textContent = 'اضغط على زر الاستيراد للمتابعة';
+                card.style.borderColor = '#10b981';
+                card.style.background  = 'linear-gradient(135deg,#ecfdf5,#d1fae5)';
             }
         });
     });
 
-    // confirm dangerous actions
-    document.querySelectorAll(".btn-delete").forEach(btn => {
-        btn.addEventListener("click", function (e) {
-            if (!confirm("هل أنت متأكد من هذا الإجراء؟")) {
-                e.preventDefault();
-            }
+    /* ── Delete confirmation ── */
+    document.querySelectorAll('.btn-delete[type="submit"]').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            if (!confirm('هل أنت متأكد من هذا الإجراء؟')) e.preventDefault();
         });
     });
 
-    // auto hide success
-    const successBox = document.querySelector(".success");
+    /* ── Auto-dismiss success alerts ── */
+    const successBox = document.querySelector('.success');
     if (successBox) {
         setTimeout(() => {
-            successBox.style.opacity = "0";
-            successBox.style.transform = "translateY(-10px)";
-            successBox.style.transition = ".5s";
-            setTimeout(() => successBox.remove(), 500);
-        }, 3500);
+            successBox.style.transition = 'opacity .5s ease, transform .5s ease';
+            successBox.style.opacity    = '0';
+            successBox.style.transform  = 'translateY(-8px)';
+            setTimeout(() => successBox.remove(), 520);
+        }, 3800);
     }
 
+    /* ── Animate cards on load ── */
+    document.querySelectorAll('.card, .box, .service-card').forEach((el, i) => {
+        el.style.animationDelay = (i * 0.04) + 's';
+        el.classList.add('animate-in');
+    });
+
+    /* ── Table row click ripple ── */
+    document.querySelectorAll('tbody tr').forEach(row => {
+        row.style.cursor = row.classList.contains('liste-row') ? 'pointer' : '';
+    });
+
 });
+
+/* ── inject animation style once ── */
+(function () {
+    const s = document.createElement('style');
+    s.textContent = `
+      .animate-in {
+        animation: slideUp .35s cubic-bezier(.4,0,.2,1) both;
+      }
+      @keyframes slideUp {
+        from { opacity:0; transform:translateY(14px); }
+        to   { opacity:1; transform:translateY(0); }
+      }
+    `;
+    document.head.appendChild(s);
+})();

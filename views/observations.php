@@ -60,10 +60,10 @@ $observations = $observationModel->getObservations();
                         <option value="">اختيار اللائحة</option>
 
                         <?php foreach ($listes as $liste): ?>
-                            <option value="<?= htmlspecialchars($liste['id_liste']) ?>">
-                                <?= htmlspecialchars($liste['id_liste']) ?> -
-                                <?= $liste['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?> -
-                                <?= htmlspecialchars($liste['service'] ?? '') ?> -
+                            <option value="<?= htmlspecialchars($liste['id'] ?? $liste['id_liste'] ?? '') ?>">
+                                <?= htmlspecialchars($liste['id'] ?? $liste['id_liste'] ?? '') ?> —
+                                <?= ($liste['type_liste'] ?? '') == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?> —
+                                <?= htmlspecialchars($liste['service'] ?? '') ?> —
                                 <?= htmlspecialchars($liste['annee'] ?? '') ?>
                             </option>
                         <?php endforeach; ?>
@@ -161,7 +161,7 @@ $observations = $observationModel->getObservations();
                                         <span class="badge info">عادي</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?= htmlspecialchars($obs['date_observation'] ?? '') ?></td>
+                                <td><?= htmlspecialchars($obs['date_observation'] ?? $obs['created_at'] ?? '') ?></td>
                             </tr>
 
                         <?php endforeach; ?>

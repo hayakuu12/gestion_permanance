@@ -1,7 +1,5 @@
 <?php
 
-
-
 require_once __DIR__ . '/../config/database.php';
 
 class Controle
@@ -14,27 +12,71 @@ class Controle
         $this->conn = $database->getConnection();
     }
 
-    public function ajouterControle($id_element, $type_controle, $message, $niveau)
+    private function enumToAr(string $enum): string
     {
-        $sql = "INSERT INTO controles 
-                (id_element, type_controle, message, niveau)
-                VALUES (?, ?, ?, ?)";
-
-        $stmt = $this->conn->prepare($sql);
-
-        return $stmt->execute([
-            $id_element,
-            $type_controle,
-            $message,
-            $niveau
-        ]);
+        $map = [
+            'LIMIT_EXCEEDED'    => 'تجاوز الحد المسموح',
+            'CALCULATION_ERROR' => 'خطأ في الحساب',
+            'MISSING_DATA'      => 'بيانات ناقصة',
+            'CONFLICT'          => 'تعارض',
+            'NOT_FOUND'         => 'موظف غير مسجل',
+        ];
+        return $map[$enum] ?? $enum;
     }
 
-    public function verifierDepassementPermanence($id_element, $nombre_jours)
+    public function ajouterControle($list_id, $type_controle, $message, $niveau)
+    {
+        $list_type  = str_starts_with((string)$list_id, 'oc') ? 'ON_CALL' : 'OVERTIME';
+        $severity   = ($niveau === 'grave') ? 'error' : 'warning';
+        $error_type = 'MISSING_DATA';
+        if (mb_strpos($type_controle, 'تجاوز') !== false) $error_type = 'LIMIT_EXCEEDED';
+        if (mb_strpos($type_controle, 'تعارض') !== false) $error_type = 'CONFLICT';
+
+        $sql  = "INSERT INTO list_validation_errors (list_id, list_type, error_type, message, severity)
+                 VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        return $stmt->execute([$list_id, $list_type, $error_type, $message, $severity]);
+    }
+
+    public function getControles()
+    {
+        $sql = "
+            SELECT
+                lve.id            AS id_controle,
+                lve.list_id       AS id_liste,
+                lve.error_type    AS type_controle_enum,
+                lve.message,
+                lve.severity,
+                lve.created_at    AS date_controle,
+                lve.employee_id   AS numero_tajir,
+                e.full_name       AS nom_complet
+            FROM list_validation_errors lve
+            LEFT JOIN employees e ON e.id = lve.employee_id
+            ORDER BY lve.id DESC
+        ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($rows as &$r) {
+            $r['type_controle'] = $this->enumToAr($r['type_controle_enum']);
+            $r['niveau']        = $r['severity'] === 'error' ? 'grave' : 'attention';
+            $r['nom_complet']   = $r['nom_complet'] ?? '';
+        }
+        return $rows;
+    }
+
+    public function countControles()
+    {
+        return (int)$this->conn->query("SELECT COUNT(*) FROM list_validation_errors")->fetchColumn();
+    }
+
+    /* Kept for compatibility — inserts into list_validation_errors */
+    public function verifierDepassementPermanence($list_id, $nombre_jours)
     {
         if ($nombre_jours > 6) {
             $this->ajouterControle(
-                $id_element,
+                $list_id,
                 "تجاوز الديمومة",
                 "تجاوز الحد المسموح به للديمومة: 6 أيام في الشهر",
                 "grave"
@@ -42,83 +84,15 @@ class Controle
         }
     }
 
-    public function verifierDepassementHeures($id_element, $nombre_heures)
+    public function verifierDepassementHeures($list_id, $nombre_heures)
     {
         if ($nombre_heures > 24) {
             $this->ajouterControle(
-                $id_element,
+                $list_id,
                 "تجاوز الساعات الإضافية",
                 "تجاوز الحد المسموح به للساعات الإضافية: 24 ساعة في الشهر",
                 "grave"
             );
         }
-    }
-
-    public function verifierConflitPermanenceHeures()
-    {
-        $sql = "
-            SELECT e1.id_element, e1.nom_complet, e1.numero_tajir
-            FROM elements_liste e1
-            JOIN listes l1 ON e1.id_liste = l1.id_liste
-            JOIN elements_liste e2 ON e1.numero_tajir = e2.numero_tajir
-            JOIN listes l2 ON e2.id_liste = l2.id_liste
-            WHERE l1.type_liste = 'permanence'
-            AND l2.type_liste = 'heures_supp'
-            AND l1.trimestre = l2.trimestre
-            AND l1.annee = l2.annee
-        ";
-
-        $stmt = $this->conn->query($sql);
-        $resultats = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($resultats as $row) {
-            $this->ajouterControle(
-                $row['id_element'],
-                "تعارض بين اللوائح",
-                "الموظف موجود في لائحة الديمومة ولائحة الساعات الإضافية",
-                "grave"
-            );
-        }
-    }
-
-    public function getControles()
-    {
-        $sql = "
-
-        SELECT
-            c.*,
-            e.nom_complet,
-            e.numero_tajir
-
-        FROM controles c
-
-        INNER JOIN elements_liste e
-        ON c.id_element = e.id_element
-
-        ORDER BY c.id_controle DESC
-
-    ";
-
-        $stmt =
-            $this->conn->prepare($sql);
-
-        $stmt->execute();
-
-        return
-            $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    public function countControles()
-    {
-        $sql =
-            "SELECT COUNT(*) as total
-     FROM controles";
-
-        $stmt =
-            $this->conn->prepare($sql);
-
-        $stmt->execute();
-
-        return
-            $stmt->fetch()['total'];
     }
 }

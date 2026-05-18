@@ -88,11 +88,13 @@ class ImportController
             if ($numero_tajir != "" && !isset($seenWarnings[$numero_tajir])) {
                 $employeExiste = $this->employeModel->getEmployeByTajir($numero_tajir);
                 if (!$employeExiste) {
+                    $dept_id = $this->listeModel->getDeptIdFromList($id_liste);
+                    $this->employeModel->createEmploye($numero_tajir, $nom_complet, $cadre, $dept_id ?? '');
                     $this->observationModel->ajouterObservation(
                         $id_liste,
                         "موظف غير مسجل",
-                        "رقم التأجير " . $numero_tajir . " (" . $nom_complet . ") غير موجود في قاعدة بيانات الموظفين",
-                        "grave"
+                        "رقم التأجير " . $numero_tajir . " (" . $nom_complet . ") لم يكن موجودا في قاعدة البيانات. تم إنشاء سجل جديد تلقائيا.",
+                        "attention"
                     );
                 }
                 $seenWarnings[$numero_tajir] = true;

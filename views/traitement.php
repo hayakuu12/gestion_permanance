@@ -3,7 +3,6 @@
 require_once 'autoload.php';
 
 require_once 'controllers/ImportController.php';
-require_once 'models/Controle.php';
 require_once 'models/Validation.php';
 require_once 'models/Liste.php';
 
@@ -12,7 +11,6 @@ $showManualForm = false;
 $manualListeId = "";
 $manualType = "";
 
-$controleModel = new Controle();
 $validationModel = new Validation();
 $listeModel = new Liste();
 
@@ -118,7 +116,6 @@ if (isset($_POST['corriger'])) {
     $success = "تم طلب تصحيح اللائحة";
 }
 
-$controles = $controleModel->getControles();
 $elements = $listeModel->getAllElements();
 
 ?>
@@ -329,8 +326,8 @@ $elements = $listeModel->getAllElements();
                             <td><?= htmlspecialchars($el['service'] ?? '') ?></td>
                             <td><?= $el['type_liste'] == 'permanence' ? 'ديمومة' : 'ساعات إضافية' ?></td>
                             <td><?= htmlspecialchars($el['mois'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($el['date_debut'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($el['date_fin'] ?? '') ?></td>
+                            <td><?php $d=$el['date_debut']??''; echo $d?date('d/m/Y',strtotime($d)):''; ?></td>
+                            <td><?php $d=$el['date_fin']??''; echo $d?date('d/m/Y',strtotime($d)):''; ?></td>
                             <td><?= htmlspecialchars($el['nombre_jours'] ?? '') ?></td>
                             <td><?= htmlspecialchars($el['nombre_heures'] ?? '') ?></td>
                             <td><?= htmlspecialchars($el['trimestre'] ?? '') ?></td>
@@ -344,60 +341,6 @@ $elements = $listeModel->getAllElements();
 
                     <tr>
                         <td colspan="13">لا توجد معطيات مستوردة حاليا</td>
-                    </tr>
-
-                <?php endif; ?>
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-    <div class="box">
-
-        <h2>نتائج المراقبة</h2>
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>الاسم الكامل</th>
-                    <th>رقم التأجير</th>
-                    <th>نوع المراقبة</th>
-                    <th>الملاحظة</th>
-                    <th>المستوى</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                <?php if (!empty($controles)): ?>
-
-                    <?php foreach ($controles as $controle): ?>
-
-                        <tr>
-                            <td><?= htmlspecialchars($controle['nom_complet'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($controle['numero_tajir'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($controle['type_controle'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($controle['message'] ?? '') ?></td>
-                            <td>
-                                <?php if ($controle['niveau'] == 'grave'): ?>
-                                    <span class="badge danger">خطير</span>
-                                <?php elseif ($controle['niveau'] == 'attention'): ?>
-                                    <span class="badge warning">تنبيه</span>
-                                <?php else: ?>
-                                    <span class="badge info">معلومة</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-
-                    <?php endforeach; ?>
-
-                <?php else: ?>
-
-                    <tr>
-                        <td colspan="5">لا توجد ملاحظات حاليا</td>
                     </tr>
 
                 <?php endif; ?>

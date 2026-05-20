@@ -217,9 +217,9 @@ class Liste
         return $this->_getHeuresRows(['id_liste' => $id_liste]);
     }
 
-    public function filtrerElements($annee=null, $trimestre=null, $service=null, $numero_tajir=null, $type_liste=null)
+    public function filtrerElements($annee=null, $trimestre=null, $service=null, $numero_tajir=null, $type_liste=null, $nom=null)
     {
-        $f = compact('annee', 'trimestre', 'service', 'numero_tajir');
+        $f = compact('annee', 'trimestre', 'service', 'numero_tajir', 'nom');
         if ($type_liste === 'permanence')  return $this->_getPermRows($f);
         if ($type_liste === 'heures_supp') return $this->_getHeuresRows($f);
         return array_merge($this->_getPermRows($f), $this->_getHeuresRows($f));
@@ -257,8 +257,9 @@ class Liste
         if (!empty($f['annee']))        { $sql .= " AND ol.year = ?";              $params[] = $f['annee']; }
         if (!empty($f['trimestre']))    { $sql .= " AND ol.period = ?";            $params[] = $f['trimestre']; }
         if (!empty($f['service']))      { $sql .= " AND d.name = ?";              $params[] = $f['service']; }
-        if (!empty($f['numero_tajir'])) { $sql .= " AND ocr.employee_id LIKE ?";  $params[] = '%'.$f['numero_tajir'].'%'; }
-        if (!empty($f['id_liste']))     { $sql .= " AND ocr.list_id = ?";         $params[] = $f['id_liste']; }
+        if (!empty($f['numero_tajir'])) { $sql .= " AND ocr.employee_id LIKE ?";                         $params[] = '%'.$f['numero_tajir'].'%'; }
+        if (!empty($f['nom']))          { $sql .= " AND COALESCE(e.full_name, ocr.employee_id) LIKE ?"; $params[] = '%'.$f['nom'].'%'; }
+        if (!empty($f['id_liste']))     { $sql .= " AND ocr.list_id = ?";                               $params[] = $f['id_liste']; }
         $sql .= " ORDER BY ocd.id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);
@@ -306,8 +307,9 @@ class Liste
         if (!empty($f['annee']))        { $sql .= " AND otl.year = ?";             $params[] = $f['annee']; }
         if (!empty($f['trimestre']))    { $sql .= " AND otl.period = ?";           $params[] = $f['trimestre']; }
         if (!empty($f['service']))      { $sql .= " AND d.name = ?";              $params[] = $f['service']; }
-        if (!empty($f['numero_tajir'])) { $sql .= " AND otr.employee_id LIKE ?";  $params[] = '%'.$f['numero_tajir'].'%'; }
-        if (!empty($f['id_liste']))     { $sql .= " AND otr.list_id = ?";         $params[] = $f['id_liste']; }
+        if (!empty($f['numero_tajir'])) { $sql .= " AND otr.employee_id LIKE ?";                         $params[] = '%'.$f['numero_tajir'].'%'; }
+        if (!empty($f['nom']))          { $sql .= " AND COALESCE(e.full_name, otr.employee_id) LIKE ?"; $params[] = '%'.$f['nom'].'%'; }
+        if (!empty($f['id_liste']))     { $sql .= " AND otr.list_id = ?";                               $params[] = $f['id_liste']; }
         $sql .= " ORDER BY otr.id DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute($params);

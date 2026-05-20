@@ -454,7 +454,6 @@ foreach ($permanences as $p) {
                 <button type="submit" name="modifier">حفظ التعديلات</button>
                 <button type="button" class="btn-delete" onclick="fermerModal()">إلغاء</button>
             </div>
-
         </form>
 
     </div>

@@ -1,0 +1,88 @@
+@startuml
+
+left to right direction
+
+skinparam backgroundColor #F9FAFB
+skinparam actor {
+    BackgroundColor #FEF3C7
+    BorderColor #D97706
+    FontColor #92400E
+    FontSize 14
+    FontStyle bold
+}
+skinparam usecase {
+    BackgroundColor #DBEAFE
+    BorderColor #2563EB
+    FontColor #1E3A5F
+    FontSize 12
+}
+skinparam package {
+    FontSize 13
+    FontStyle bold
+}
+skinparam arrow {
+    Color #6B7280
+    FontColor #6B7280
+    FontSize 11
+}
+
+' ── ACTEUR ─────────────────────────────────────────────────
+
+actor "👤 Administrateur" as Admin
+
+' ── SYSTÈME ────────────────────────────────────────────────
+
+rectangle "🏛️  Système de Gestion des Permanences et Heures Supp." {
+
+    package "📊 Tableau de Bord" #E0F2FE {
+        usecase "Voir le résumé général\n(listes, validations...)" as UC1
+    }
+
+    package "🗓️ Permanences (Astreintes)" #F0FDF4 {
+        usecase "Consulter la liste\ndes permanences" as UC2
+        usecase "Importer un fichier PDF\n(extraction automatique)" as UC3
+        usecase "Saisir une permanence\nmanuellement" as UC4
+    }
+
+    package "⏱️ Heures Supplémentaires" #FFF7ED {
+        usecase "Consulter la liste\ndes heures supplémentaires" as UC5
+        usecase "Saisir des heures\nsupplémentaires" as UC6
+    }
+
+    package "✅ Validation des Listes" #FDF4FF {
+        usecase "Valider une liste\n(approuver)" as UC7
+        usecase "Rejeter une liste\n(refuser)" as UC8
+        usecase "Demander une correction" as UC9
+    }
+
+    package "📈 Rapports et Statistiques" #FFFBEB {
+        usecase "Consulter le rapport\ngénéral" as UC10
+        usecase "Visualiser les graphiques\n(par service, par mois...)" as UC11
+    }
+
+    package "📝 Observations" #FFF1F2 {
+        usecase "Ajouter une observation\n(signaler une erreur)" as UC12
+        usecase "Consulter les observations" as UC13
+    }
+}
+
+' ── CONNEXIONS ─────────────────────────────────────────────
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC5
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+Admin --> UC13
+
+' ── INCLUSIONS (l'import PDF déclenche la saisie) ──────────
+
+UC3 ..> UC4 : <<inclut>>
+UC3 ..> UC6 : <<inclut>>
+
+@enduml

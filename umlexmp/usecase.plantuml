@@ -1,0 +1,109 @@
+@startuml
+
+left to right direction
+
+skinparam backgroundColor #F9FAFB
+skinparam actor {
+    BackgroundColor #FEF3C7
+    BorderColor #D97706
+    FontColor #92400E
+    FontSize 14
+    FontStyle bold
+}
+skinparam usecase {
+    BackgroundColor #DBEAFE
+    BorderColor #2563EB
+    FontColor #1E3A5F
+    FontSize 12
+}
+skinparam package {
+    FontSize 13
+    FontStyle bold
+}
+skinparam arrow {
+    Color #6B7280
+    FontColor #6B7280
+    FontSize 11
+}
+
+' ── ACTOR ──────────────────────────────────────────────────
+
+actor "👤 Responsable" as Admin
+
+' ── SYSTEM ─────────────────────────────────────────────────
+
+rectangle "🏛️  Application - Ministère de la Justice" {
+
+    package "📊 Tableau de Bord" #E0F2FE {
+        usecase "Voir les chiffres\n(stagiaires, formations...)" as UC1
+        usecase "Voir les alertes\n(stages qui se terminent bientôt)" as UC2
+    }
+
+    package "🏢 Services" #F0FDF4 {
+        usecase "Ajouter / Modifier /\nSupprimer un service" as UC3
+    }
+
+    package "👨‍💼 Employés" #FFF7ED {
+        usecase "Ajouter / Modifier /\nSupprimer un employé" as UC4
+    }
+
+    package "🎓 Stagiaires" #FDF4FF {
+        usecase "Ajouter / Modifier /\nSupprimer un stagiaire" as UC5
+        usecase "Voir la fiche\ndu stagiaire" as UC6
+        usecase "Envoyer les documents\n(assurance, rapport...)" as UC7
+    }
+
+    package "📚 Formation de Base" #FFFBEB {
+        usecase "Ajouter / Modifier /\nSupprimer une formation" as UC8
+        usecase "Envoyer le rapport\nde formation" as UC9
+    }
+
+    package "📖 Formation Continue" #F0FDF4 {
+        usecase "Ajouter / Modifier /\nSupprimer une formation" as UC10
+        usecase "Gérer les cours\n(ajouter / supprimer)" as UC11
+    }
+
+    package "🎤 Séminaires (Nadwat)" #EFF6FF {
+        usecase "Ajouter / Modifier /\nSupprimer un séminaire" as UC12
+        usecase "Gérer les participants\n(ajouter / supprimer)" as UC13
+    }
+
+    package "🎓 Masters" #FDF4FF {
+        usecase "Ajouter / Modifier /\nSupprimer un master" as UC14
+    }
+
+    package "📝 Étudiants Fonctionnaires\n(Talib Muwazzaf)" #FFF1F2 {
+        usecase "Ajouter / Modifier /\nSupprimer un étudiant" as UC15
+        usecase "Gérer les notes\npar semestre (wahedat)" as UC16
+    }
+}
+
+' ── CONNECTIONS ────────────────────────────────────────────
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+Admin --> UC16
+
+' ── INCLUDES (logique de navigation) ───────────────────────
+
+UC6  ..> UC5  : <<inclut>>
+UC7  ..> UC6  : <<inclut>>
+UC9  ..> UC8  : <<inclut>>
+UC11 ..> UC10 : <<inclut>>
+UC13 ..> UC12 : <<inclut>>
+UC16 ..> UC15 : <<inclut>>
+
+@enduml

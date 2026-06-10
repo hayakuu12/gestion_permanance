@@ -1,0 +1,80 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #EEF2FF
+    BorderColor #4F46E5
+    FontColor #1E293B
+}
+
+' ── ENTITÉS PRINCIPALES ─────────────────────────────────────
+
+class Departement {
+    + id : string
+    + nom : string
+}
+
+class Employe {
+    + id : string
+    + nom_complet : string
+    + poste : string
+}
+
+class ListePermanence {
+    + id : string
+    + annee : int
+    + trimestre : int
+    + statut : PENDING | VALID | INVALID
+}
+
+class EnregistrementPermanence {
+    + id : int
+    + nombre_jours : int
+}
+
+class DatePermanence {
+    + id : int
+    + date : date
+    + type_jour : HOLIDAY | WEEKEND
+}
+
+class ListeHeuresSupp {
+    + id : string
+    + annee : int
+    + trimestre : int
+    + statut : PENDING | VALID | INVALID
+}
+
+class EnregistrementHeuresSupp {
+    + id : int
+    + heures_mois_1 : float
+    + heures_mois_2 : float
+    + heures_mois_3 : float
+    + total_heures : float
+    + travaux : string
+}
+
+class Observation {
+    + id : int
+    + type : string
+    + message : string
+    + niveau : error | warning
+}
+
+' ── RELATIONS ───────────────────────────────────────────────
+
+Departement "1" --> "n" ListePermanence   : possède
+Departement "1" --> "n" ListeHeuresSupp   : possède
+
+Employe "1" --> "n" EnregistrementPermanence  : participe dans
+Employe "1" --> "n" EnregistrementHeuresSupp  : participe dans
+
+ListePermanence "1" --> "n" EnregistrementPermanence : contient
+EnregistrementPermanence "1" --> "n" DatePermanence  : a des dates
+
+ListeHeuresSupp "1" --> "n" EnregistrementHeuresSupp : contient
+
+ListePermanence "1" --> "n" Observation  : signalée par
+ListeHeuresSupp "1" --> "n" Observation  : signalée par
+
+@enduml

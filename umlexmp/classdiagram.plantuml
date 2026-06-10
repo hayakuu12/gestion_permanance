@@ -1,0 +1,115 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #EEF2FF
+    BorderColor #4F46E5
+    FontColor #1E293B
+}
+
+' ── CORE ENTITIES ──────────────────────────────────────────
+
+class Service {
+    + id : int
+    + nom_ar : string
+    + nom_fr : string
+}
+
+class Employe {
+    + id : int
+    + nom_complet : string
+    + cin : string
+    + telephone : string
+    + specialite : string
+}
+
+class Stagiaire {
+    + id : int
+    + nom : string
+    + specialite : string
+    + date_debut : date
+    + date_fin : date
+    + statut : string
+    + doc_demande : string
+    + doc_assurance : string
+    + doc_rapport : string
+}
+
+class FormationBase {
+    + id : int
+    + date_debut : date
+    + date_fin : date
+    + rapport : string
+}
+
+class FormationContinue {
+    + id : int
+    + sujet : string
+    + lieu : string
+    + date_debut : date
+}
+
+class Dars {
+    + id : int
+    + nom_dars : string
+    + date_dars : date
+    + heure : string
+}
+
+class Nadwa {
+    + id : int
+    + sujet : string
+    + type_nadwa : string
+    + date_nadwa : date
+    + lieu : string
+}
+
+class Participant {
+    + id : int
+    + nom : string
+}
+
+class Master {
+    + id : int
+    + nom_master : string
+    + annee : string
+    + universite : string
+    + specialite : string
+}
+
+class TalibMuwazzaf {
+    + id : int
+    + nom_complet : string
+    + num_matricule : string
+    + telephone : string
+}
+
+class Fasl {
+    + id : int
+    + numero_fasl : int
+}
+
+class Wahda {
+    + id : int
+    + nom_wahda : string
+    + nuqta : decimal
+}
+
+' ── RELATIONS ──────────────────────────────────────────────
+
+Stagiaire "n" --> "1" Service : affecté à
+
+FormationBase "n" --> "1" Employe : concerne
+FormationBase "n" --> "1" Service : dans le service
+
+FormationContinue "1" --> "n" Dars : contient
+
+Nadwa "1" --> "n" Participant : a
+
+Master "1" --> "n" TalibMuwazzaf : contient
+
+TalibMuwazzaf "1" --> "n" Fasl : a 4 semestres
+
+Fasl "1" --> "n" Wahda : contient
+
+@enduml
